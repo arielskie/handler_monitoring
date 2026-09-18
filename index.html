@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Handler Repair Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 24px;
+            width: 100vw;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-title h1 { font-size: 26px; font-weight: 700; margin: 0; color: var(--text-dark); letter-spacing: -0.5px; }
+        .header-title p { font-size: 14px; color: var(--text-muted); margin: 4px 0 0 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-card .label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--text-dark); margin-top: 8px; }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            width: 100%;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .search-filter-group {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            max-width: 500px;
+        }
+        .input-control {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        .input-control:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .search-input { flex: 2; }
+        .filter-select { flex: 1; cursor: pointer; }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-edit { background: #f1f5f9; color: #334155; }
+        .btn-edit:hover { background: #e2e8f0; }
+        .btn-delete { background: #fef2f2; color: #dc2626; }
+        .btn-delete:hover { background: #fee2e2; }
+        .btn-save { background: #dcfce7; color: #15803d; }
+        .btn-save:hover { background: #bbf7d0; }
+        .btn-cancel { background: #f1f5f9; color: #64748b; }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th {
+            padding: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+        tr:hover td { background-color: #f8fafc; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .status-Active { background: #fef2f2; color: #dc2626; }
+        .status-Pending { background: #fffbeb; color: #d97706; }
+        .status-Resolved { background: #f0fdf4; color: #16a34a; }
+
+        .cell-img {
+            max-width: 90px;
+            max-height: 60px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .cell-img:hover { transform: scale(1.1); }
+
+        #alertToast {
+            display: none;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .toast-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .toast-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>Sample Handler Repair Monitoring</h1>
+            <p>Real-time database records and repair tracking</p>
+        </div>
+        <button class="btn btn-primary" onclick="addNewRow()">+ Add New Entry</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">Total Records</div>
+            <div class="value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Active Events</div>
+            <div class="value" id="statActive" style="color: #dc2626;">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Pending Review</div>
+            <div class="value" id="statPending" style="color: #d97706;">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Resolved</div>
+            <div class="value" id="statResolved" style="color: #16a34a;">0</div>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div id="alertToast"></div>
+
+        <div class="toolbar">
+            <div class="search-filter-group">
+                <input type="text" id="searchInput" class="input-control search-input" placeholder="Search Handler, Problem, or Cause..." oninput="filterData()">
+                <select id="statusFilter" class="input-control filter-select" onchange="filterData()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+            </div>
+            <button class="btn btn-edit" onclick="loadTableData()">↻ Refresh Data</button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>WW</th>
+                        <th>DATE</th>
+                        <th>TESTER ID</th>
+                        <th>HANDLER ID</th>
+                        <th>Handler Major Part</th>
+                        <th>PROBLEM</th>
+                        <th>ROOT CAUSE</th>
+                        <th>DETAILS (Image as Evidence)</th>
+                        <th>MATERIAL CODE</th>
+                        <th>Stock / Non Stock</th>
+                        <th>PENDING ACTION</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr><td colspan="13" style="text-align:center; color: var(--text-muted); padding:30px;">Loading records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const readUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
+
+    let rawData = [];
+
+    async function loadTableData() {
+        try {
+            const response = await fetch(readUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+            
+            // Extract array safely based on Power Automate response structure
+            if (Array.isArray(data)) {
+                rawData = data;
+            } else if (Array.isArray(data.value)) {
+                rawData = data.value;
+            } else if (data.body && Array.isArray(data.body.value)) {
+                rawData = data.body.value;
+            } else {
+                console.warn("Received non-array payload:", data);
+                rawData = [];
+            }
+
+            updateStats();
+            filterData();
+        } catch (err) {
+            console.error("Fetch failed:", err);
+            showToast("Failed to fetch database records.", "toast-error");
+        }
+    }
+
+    function updateStats() {
+        if (!Array.isArray(rawData)) return;
+        document.getElementById('statTotal').innerText = rawData.length;
+        document.getElementById('statActive').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Active').length;
+        document.getElementById('statPending').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Pending').length;
+        document.getElementById('statResolved').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Resolved').length;
+    }
+
+    function getVal(row, key) {
+        if (!row) return '';
+        const aliases = {
+            'WW': ['WW', 'ww'],
+            'DATE': ['DATE', 'Date', 'date'],
+            'TESTER ID': ['TESTER ID', 'TESTER_ID', 'Tester ID', 'testerId'],
+            'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'Handler ID', 'handlerId', 'EventName'],
+            'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'majorPart'],
+            'PROBLEM': ['PROBLEM', 'Problem', 'problem'],
+            'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'Root Cause', 'rootCause'],
+            'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS', 'Details', 'details'],
+            'MATERIAL CODE': ['MATERIAL CODE', 'Material Code', 'materialCode'],
+            'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'stockItems'],
+            'PENDING ACTION': ['PENDING ACTION', 'Pending Action', 'pendingAction'],
+            'STATUS': ['STATUS', 'Status', 'status']
+        };
+
+        const keysToCheck = aliases[key] || [key];
+        for (const k of keysToCheck) {
+            if (row[k] !== undefined && row[k] !== null) return row[k];
+        }
+        return '';
+    }
+
+    function filterData() {
+        if (!Array.isArray(rawData)) return;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const selectedStatus = document.getElementById('statusFilter').value;
+
+        const filtered = rawData.filter(row => {
+            const handlerId = String(getVal(row, 'HANDLER ID')).toLowerCase();
+            const problem = String(getVal(row, 'PROBLEM')).toLowerCase();
+            const cause = String(getVal(row, 'ROOT CAUSE')).toLowerCase();
+            const status = getVal(row, 'STATUS');
+
+            const matchesSearch = handlerId.includes(searchTerm) || problem.includes(searchTerm) || cause.includes(searchTerm);
+            const matchesStatus = selectedStatus === 'ALL' || status === selectedStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        renderTable(filtered);
+    }
+
+    function renderTable(dataArray) {
+        const tbody = document.getElementById('dataTable');
+        tbody.innerHTML = '';
+
+        if (!dataArray || dataArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; color: var(--text-muted); padding:30px;">No matching records found.</td></tr>';
+            return;
+        }
+
+        dataArray.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.id = `row-${index}`;
+
+            const imgVal = getVal(row, 'DETAILS');
+            const isImage = imgVal.startsWith('data:image') || imgVal.startsWith('http');
+            const imgHtml = isImage 
+                ? `<a href="${imgVal}" target="_blank"><img src="${imgVal}" class="cell-img" alt="Evidence"></a>` 
+                : (imgVal ? imgVal : '<span style="color:#94a3b8; font-size:11px;">No image</span>');
+
+            const statusVal = getVal(row, 'STATUS') || 'Active';
+
+            tr.innerHTML = `
+                <td>${getVal(row, 'WW')}</td>
+                <td>${getVal(row, 'DATE')}</td>
+                <td>${getVal(row, 'TESTER ID')}</td>
+                <td><strong>${getVal(row, 'HANDLER ID')}</strong></td>
+                <td>${getVal(row, 'Handler Major Part')}</td>
+                <td>${getVal(row, 'PROBLEM')}</td>
+                <td>${getVal(row, 'ROOT CAUSE')}</td>
+                <td>${imgHtml}</td>
+                <td>${getVal(row, 'MATERIAL CODE')}</td>
+                <td>${getVal(row, 'STOCK ITEMS')}</td>
+                <td>${getVal(row, 'PENDING ACTION')}</td>
+                <td><span class="badge status-${statusVal}">${statusVal}</span></td>
+                <td>
+                    <button class="btn btn-edit" onclick="editRow(${index})">Edit</button>
+                    <button class="btn btn-delete" onclick="deleteRow(${index})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addNewRow() {
+        if (document.getElementById('new-row')) return;
+
+        const tbody = document.getElementById('dataTable');
+        const tr = document.createElement('tr');
+        tr.id = 'new-row';
+        tr.innerHTML = `
+            <td><input type="text" id="new-ww" class="input-control" placeholder="WW" style="width:60px;"></td>
+            <td><input type="date" id="new-date" class="input-control" style="width:110px;"></td>
+            <td><input type="text" id="new-tester" class="input-control" placeholder="Tester ID" style="width:80px;"></td>
+            <td><input type="text" id="new-handler" class="input-control" placeholder="Handler ID" style="width:90px;"></td>
+            <td><input type="text" id="new-majorpart" class="input-control" placeholder="Major Part" style="width:80px;"></td>
+            <td><input type="text" id="new-problem" class="input-control" placeholder="Problem" style="width:100px;"></td>
+            <td><input type="text" id="new-cause" class="input-control" placeholder="Root Cause" style="width:100px;"></td>
+            <td><input type="file" id="new-image-file" class="input-control" accept="image/*" style="width:120px;"></td>
+            <td><input type="text" id="new-material" class="input-control" placeholder="Material Code" style="width:90px;"></td>
+            <td>
+                <select id="new-stock" class="input-control" style="width:90px;">
+                    <option value="Stock Items">Stock Items</option>
+                    <option value="Non Stock Items">Non Stock Items</option>
+                </select>
+            </td>
+            <td><input type="text" id="new-pending" class="input-control" placeholder="Pending Action" style="width:100px;"></td>
+            <td>
+                <select id="new-status" class="input-control" style="width:85px;">
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+            </td>
+            <td>
+                <button class="btn btn-save" onclick="saveNewRow()">Save</button>
+                <button class="btn btn-cancel" onclick="filterData()">Cancel</button>
+            </td>
+        `;
+        tbody.prepend(tr);
+    }
+
+    async function saveNewRow() {
+        const handlerId = document.getElementById('new-handler').value;
+        const problem = document.getElementById('new-problem').value;
+        const fileInput = document.getElementById('new-image-file');
+
+        if (!handlerId || !problem) {
+            showToast("Please enter HANDLER ID and PROBLEM.", "toast-error");
+            return;
+        }
+
+        let imageBase64 = "";
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            imageBase64 = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        rawData.unshift({
+            "WW": document.getElementById('new-ww').value,
+            "DATE": document.getElementById('new-date').value,
+            "TESTER ID": document.getElementById('new-tester').value,
+            "HANDLER ID": handlerId,
+            "Handler Major Part": document.getElementById('new-majorpart').value,
+            "PROBLEM": problem,
+            "ROOT CAUSE": document.getElementById('new-cause').value,
+            "DETAILS\n(Image as Evidence)": imageBase64,
+            "MATERIAL CODE": document.getElementById('new-material').value,
+            "Stock Items\nNon Stock Items": document.getElementById('new-stock').value,
+            "PENDING ACTION": document.getElementById('new-pending').value,
+            "STATUS": document.getElementById('new-status').value
+        });
+
+        showToast("New repair record created successfully!", "toast-success");
+        updateStats();
+        filterData();
+    }
+
+    function editRow(index) {
+        const row = rawData[index];
+        const tr = document.getElementById(`row-${index}`);
+        const statusVal = getVal(row, 'STATUS') || 'Active';
+        const stockVal = getVal(row, 'STOCK ITEMS') || 'Stock Items';
+
+        tr.innerHTML = `
+            <td><input type="text" id="edit-ww-${index}" class="input-control" value="${getVal(row, 'WW')}" style="width:60px;"></td>
+            <td><input type="text" id="edit-date-${index}" class="input-control" value="${getVal(row, 'DATE')}" style="width:110px;"></td>
+            <td><input type="text" id="edit-tester-${index}" class="input-control" value="${getVal(row, 'TESTER ID')}" style="width:80px;"></td>
+            <td><input type="text" id="edit-handler-${index}" class="input-control" value="${getVal(row, 'HANDLER ID')}" style="width:90px;"></td>
+            <td><input type="text" id="edit-majorpart-${index}" class="input-control" value="${getVal(row, 'Handler Major Part')}" style="width:80px;"></td>
+            <td><input type="text" id="edit-problem-${index}" class="input-control" value="${getVal(row, 'PROBLEM')}" style="width:100px;"></td>
+            <td><input type="text" id="edit-cause-${index}" class="input-control" value="${getVal(row, 'ROOT CAUSE')}" style="width:100px;"></td>
+            <td><input type="file" id="edit-image-file-${index}" class="input-control" accept="image/*" style="width:120px;"></td>
+            <td><input type="text" id="edit-material-${index}" class="input-control" value="${getVal(row, 'MATERIAL CODE')}" style="width:90px;"></td>
+            <td>
+                <select id="edit-stock-${index}" class="input-control" style="width:90px;">
+                    <option value="Stock Items" ${stockVal === 'Stock Items' ? 'selected' : ''}>Stock Items</option>
+                    <option value="Non Stock Items" ${stockVal === 'Non Stock Items' ? 'selected' : ''}>Non Stock Items</option>
+                </select>
+            </td>
+            <td><input type="text" id="edit-pending-${index}" class="input-control" value="${getVal(row, 'PENDING ACTION')}" style="width:100px;"></td>
+            <td>
+                <select id="edit-status-${index}" class="input-control" style="width:85px;">
+                    <option value="Active" ${statusVal === 'Active' ? 'selected' : ''}>Active</option>
+                    <option value="Pending" ${statusVal === 'Pending' ? 'selected' : ''}>Pending</option>
+                    <option value="Resolved" ${statusVal === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                </select>
+            </td>
+            <td>
+                <button class="btn btn-save" onclick="saveEdit(${index})">Save</button>
+                <button class="btn btn-cancel" onclick="filterData()">Cancel</button>
+            </td>
+        `;
+    }
+
+    async function saveEdit(index) {
+        const fileInput = document.getElementById(`edit-image-file-${index}`);
+
+        rawData[index]["WW"] = document.getElementById(`edit-ww-${index}`).value;
+        rawData[index]["DATE"] = document.getElementById(`edit-date-${index}`).value;
+        rawData[index]["TESTER ID"] = document.getElementById(`edit-tester-${index}`).value;
+        rawData[index]["HANDLER ID"] = document.getElementById(`edit-handler-${index}`).value;
+        rawData[index]["Handler Major Part"] = document.getElementById(`edit-majorpart-${index}`).value;
+        rawData[index]["PROBLEM"] = document.getElementById(`edit-problem-${index}`).value;
+        rawData[index]["ROOT CAUSE"] = document.getElementById(`edit-cause-${index}`).value;
+        rawData[index]["MATERIAL CODE"] = document.getElementById(`edit-material-${index}`).value;
+        rawData[index]["Stock Items\nNon Stock Items"] = document.getElementById(`edit-stock-${index}`).value;
+        rawData[index]["PENDING ACTION"] = document.getElementById(`edit-pending-${index}`).value;
+        rawData[index]["STATUS"] = document.getElementById(`edit-status-${index}`).value;
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            rawData[index]["DETAILS\n(Image as Evidence)"] = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        showToast("Record updated successfully.", "toast-success");
+        updateStats();
+        filterData();
+    }
+
+    function deleteRow(index) {
+        if (confirm("Are you sure you want to remove this record?")) {
+            rawData.splice(index, 1);
+            showToast("Record deleted.", "toast-success");
+            updateStats();
+            filterData();
+        }
+    }
+
+    function showToast(msg, type) {
+        const toast = document.getElementById('alertToast');
+        toast.className = type;
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    loadTableData();
+</script>
+
+</body>
+</html>
