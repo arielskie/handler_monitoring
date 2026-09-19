@@ -161,7 +161,6 @@
         .col-check { width: 36px; text-align: center; }
         .col-num { width: 44px; text-align: center; color: var(--text-muted); font-size: 11px; }
 
-        /* Hidden when not logged in */
         body.is-readonly .col-check { display: none !important; }
 
         tr:hover td { background-color: var(--row-hover); }
@@ -327,8 +326,8 @@
         // Write Flow (Add Row)
         const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
 
-        // Quick Delete Flow (Matches flow d60ae72d in your screenshot)
-        const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d60ae72d905c452995d766f217d497c6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
+        // Your Exact Quick Delete Flow URL
+        const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b4e3ca791183425e99995266ab810738/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
 
         let rawData = [];
         let selectedRows = new Set();
@@ -398,7 +397,7 @@
                 renderTable();
                 showToast("Logged in successfully!");
             } else {
-                alert("Invalid credentials");
+                alert("Invalid username or password");
             }
         }
 
@@ -423,7 +422,7 @@
                 });
 
                 renderTable();
-                showToast(`Loaded ${rawData.length} rows`);
+                showToast(`Loaded ${rawData.length} active rows`);
             } catch (err) {
                 console.error(err);
                 showToast("Error loading Excel records");
@@ -528,7 +527,7 @@
                 "STATUS": "Active"
             };
 
-            showToast("Saving row to Excel...");
+            showToast("Saving row to Excel Online...");
 
             try {
                 const response = await fetch(writeUrl, {
@@ -538,8 +537,8 @@
                 });
 
                 if (response.ok) {
-                    showToast("Row saved! Reloading...");
-                    setTimeout(loadTableData, 1500);
+                    showToast("Row saved! Refreshing...");
+                    setTimeout(loadTableData, 2000);
                 } else {
                     const err = await response.text();
                     alert("Power Automate Error on Add:\n" + err);
@@ -554,9 +553,8 @@
             if (!isLoggedIn || selectedRows.size === 0) return;
 
             const count = selectedRows.size;
-            if (!confirm(`Permanently delete ${count} row(s) from Excel?`)) return;
+            if (!confirm(`Permanently delete ${count} row(s) directly from Excel?`)) return;
 
-            // Collect exact IDs
             const idsToDelete = [];
             selectedRows.forEach(idx => {
                 const hnd = getVal(rawData[idx], 'HANDLER ID');
@@ -572,7 +570,7 @@
 
             try {
                 for (let hndId of idsToDelete) {
-                    console.log("Deleting HANDLER_ID:", hndId);
+                    console.log("Sending delete request to Power Automate for HANDLER_ID:", hndId);
 
                     const response = await fetch(deleteUrl, {
                         method: 'POST',
@@ -583,18 +581,22 @@
                     if (!response.ok) {
                         const err = await response.text();
                         console.error(`Delete failed for ${hndId}:`, err);
-                        alert(`Power Automate returned an error:\n${err}`);
+                        alert(`Power Automate returned an error deleting ${hndId}:\n${err}`);
                         return;
                     }
                 }
 
-                showToast("Row(s) deleted from Excel! Reloading...");
-                selectedRows.clear();
+                showToast("Deleted from Excel successfully! Waiting for OneDrive sync...");
                 
-                // Wait 2 seconds for OneDrive to commit the changes before re-reading
+                // 1. Instantly remove deleted rows locally so the UI updates immediately
+                rawData = rawData.filter((_, idx) => !selectedRows.has(idx));
+                selectedRows.clear();
+                renderTable();
+
+                // 2. Wait 2.5 seconds for OneDrive to commit and clear the file lock before fetching back
                 setTimeout(async () => {
                     await loadTableData();
-                }, 2000);
+                }, 2500);
 
             } catch (err) {
                 console.error(err);
