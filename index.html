@@ -93,6 +93,7 @@
         .btn-primary { background: #10b981; color: #ffffff; border-color: #059669; }
         .btn-primary:hover { background: #059669; }
         .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+        .btn-danger:hover { background: #fecaca; }
 
         .auth-badge {
             font-size: 12px;
@@ -160,6 +161,7 @@
         .col-check { width: 36px; text-align: center; }
         .col-num { width: 44px; text-align: center; color: var(--text-muted); font-size: 11px; }
 
+        /* Strictly hidden when logged out */
         body.is-readonly .col-check { display: none !important; }
 
         tr:hover td { background-color: var(--row-hover); }
@@ -246,7 +248,7 @@
         <div class="header-left">
             <div class="sheet-icon">田</div>
             <div class="title-group">
-                <h1>Excel Data Table <span class="badge-live">Live Sync</span></h1>
+                <h1>Excel Data Table <span class="badge-live">GitHub Pages</span></h1>
                 <div class="title-meta" id="headerSummary">Connecting to Excel...</div>
             </div>
         </div>
@@ -261,7 +263,7 @@
 
     <div class="sub-bar">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search across all fields..." oninput="renderTable()">
+            <input type="text" id="searchInput" placeholder="Search records..." oninput="renderTable()">
         </div>
     </div>
 
@@ -294,14 +296,14 @@
 
     <footer class="app-footer">
         <div id="footerCount">Showing 0 items</div>
-        <div id="footerTip">Log in to edit or delete records.</div>
+        <div id="footerTip">Log in to add or delete records in Excel.</div>
     </footer>
 
     <!-- Login Modal -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
             <h3 style="margin-bottom: 6px;">Login to Edit</h3>
-            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">Enter credentials to unlock editing.</p>
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">Log in to unlock Add and Delete functions.</p>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="loginUsername" placeholder="Username (Default: admin)" required>
                 <input type="password" id="loginPassword" placeholder="Password (Default: admin123)" required>
@@ -319,7 +321,7 @@
         const ADMIN_USER = "admin";
         const ADMIN_PASS = "admin123";
 
-        // Power Automate Endpoints
+        // Power Automate URLs
         const readUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/33cda42ea60b487ea12bc6d6b2fb094d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-W97iRQOOSQ0lRc9j2WefBnqQegAXIPRvQHX1I2bNOU";
         const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
         const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b4e3ca791183425e99995266ab810738/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
@@ -343,15 +345,6 @@
             { key: 'STATUS', label: 'STATUS' }
         ];
 
-        // Safe fetch that avoids CORS preflight blocks
-        async function safePost(url, dataObj) {
-            return await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(dataObj)
-            });
-        }
-
         function checkAuthUI() {
             const badge = document.getElementById('authStatusBadge');
             const authBtn = document.getElementById('authBtn');
@@ -364,7 +357,7 @@
                 badge.innerHTML = "🔓 Admin (Full Access)";
                 authBtn.innerText = "Logout";
                 authBtn.className = "btn-ui btn-danger";
-                footerTip.innerText = "Logged in: Select rows to delete, or click '+ Add Row'.";
+                footerTip.innerText = "Select rows to delete, or click '+ Add Row'.";
             } else {
                 document.body.classList.remove('is-admin');
                 document.body.classList.add('is-readonly');
@@ -407,56 +400,61 @@
 
         async function loadTableData() {
             try {
-                showToast("Reading Excel records...");
-                const response = await safePost(readUrl, {});
+                showToast("Fetching records from Excel...");
+                const response = await fetch(readUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
                 const textData = await response.text();
                 let data = JSON.parse(textData);
 
                 let list = Array.isArray(data) ? data : (data.value || (data.body && data.body.value) || []);
                 
-                // Keep only valid rows
+                // Exclude empty Excel placeholder rows
                 rawData = list.filter(r => {
                     const str = Object.values(r).join('').trim();
                     return str.length > 0 && str !== 'null';
                 });
 
                 renderTable();
-                showToast(`Loaded ${rawData.length} rows`);
+                showToast(`Loaded ${rawData.length} active rows`);
             } catch (err) {
                 console.error(err);
-                showToast("Failed to fetch records. Make sure you use http://localhost:8080!");
+                showToast("Error loading Excel records");
             }
         }
 
         function getVal(row, key) {
             if (!row) return '';
-            if (row[key] !== undefined && row[key] !== null) return row[key];
+            if (row[key] !== undefined && row[key] !== null) return String(row[key]).trim();
 
             const aliases = {
                 'WW': ['WW', 'ww'],
                 'DATE': ['DATE', 'Date'],
                 'TESTER ID': ['TESTER ID', 'TESTER_ID', 'TESTER_x0020_ID'],
-                'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID'],
-                'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'Handler_x0020_Major_x0020_Part'],
+                'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID', 'EventName'],
+                'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'Handler_x0020_Major_x0020_Part', 'MajorPart'],
                 'PROBLEM': ['PROBLEM', 'Problem'],
                 'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'ROOT_x0020_CAUSE'],
                 'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS'],
-                'MATERIAL CODE': ['MATERIAL CODE', 'Material Code'],
+                'MATERIAL CODE': ['MATERIAL CODE', 'Material Code', 'MATERIAL_CODE'],
                 'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'StockItems'],
-                'PENDING ACTION': ['PENDING ACTION', 'Pending Action'],
+                'PENDING ACTION': ['PENDING ACTION', 'Pending Action', 'PENDING_ACTION'],
                 'STATUS': ['STATUS', 'Status']
             };
 
             const checks = aliases[key] || [key];
             for (const k of checks) {
-                if (row[k] !== undefined && row[k] !== null) return row[k];
+                if (row[k] !== undefined && row[k] !== null) return String(row[k]).trim();
             }
 
             const cleanTarget = key.toLowerCase().replace(/[^a-z0-9]/g, '');
             for (const actualKey of Object.keys(row)) {
                 const cleanActual = actualKey.toLowerCase().replace(/_x[0-9a-f]{4}_/gi, '').replace(/[^a-z0-9]/g, '');
                 if (cleanActual === cleanTarget && row[actualKey] !== undefined && row[actualKey] !== null) {
-                    return row[actualKey];
+                    return String(row[actualKey]).trim();
                 }
             }
             return '';
@@ -511,8 +509,6 @@
             }
 
             const hndId = "08M" + Math.floor(10000 + Math.random() * 90000);
-            
-            // Matches your Write flow schema
             const newEntry = {
                 "WW": "WW2644",
                 "DATE": new Date().toISOString().split('T')[0],
@@ -528,25 +524,25 @@
                 "STATUS": "Active"
             };
 
-            // 1. Instant optimistic update on screen
-            rawData.unshift(newEntry);
-            renderTable();
-            showToast("Saving new entry to Excel...");
+            showToast("Saving row to Excel Online...");
 
-            // 2. Sync to Excel
             try {
-                const response = await safePost(writeUrl, newEntry);
-                const resultText = await response.text();
+                const response = await fetch(writeUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newEntry)
+                });
 
                 if (response.ok) {
-                    showToast("Row saved into Excel successfully!");
+                    showToast("Row saved! Refreshing...");
+                    await loadTableData();
                 } else {
-                    console.error("Write error:", resultText);
-                    alert("Power Automate rejected the row:\n" + resultText);
+                    const err = await response.text();
+                    alert("Power Automate Error on Add:\n" + err);
                 }
             } catch (err) {
                 console.error(err);
-                alert("Network error: Make sure you are on http://localhost:8080 and not file:///");
+                alert("Network error calling Write Flow.");
             }
         }
 
@@ -554,34 +550,51 @@
             if (!isLoggedIn || selectedRows.size === 0) return;
 
             const count = selectedRows.size;
-            if (!confirm(`Permanently delete ${count} row(s) from Excel?`)) return;
+            if (!confirm(`Delete ${count} row(s) directly from Excel?`)) return;
 
-            // Collect handler IDs to delete
+            // Collect exact Handler IDs
             const idsToDelete = [];
             selectedRows.forEach(idx => {
                 const hnd = getVal(rawData[idx], 'HANDLER ID');
                 if (hnd) idsToDelete.push(hnd);
             });
 
-            // 1. Instant optimistic removal from screen
-            rawData = rawData.filter((_, idx) => !selectedRows.has(idx));
-            selectedRows.clear();
-            renderTable();
+            if (idsToDelete.length === 0) {
+                alert("Could not find a valid HANDLER ID for the selected row(s).");
+                return;
+            }
+
             showToast(`Deleting ${idsToDelete.length} row(s) from Excel...`);
 
-            // 2. Sync deletes to Excel
             try {
                 for (let hndId of idsToDelete) {
-                    const response = await safePost(deleteUrl, { "HANDLER_ID": hndId });
+                    console.log("Sending delete request for HANDLER_ID:", hndId);
+
+                    const response = await fetch(deleteUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ "HANDLER_ID": hndId })
+                    });
+
                     if (!response.ok) {
                         const err = await response.text();
-                        console.error(`Failed to delete ${hndId}:`, err);
+                        console.error(`Delete failed for ${hndId}:`, err);
+                        alert(`Power Automate failed to delete ${hndId}:\n${err}`);
+                        return;
                     }
                 }
-                showToast("Selected row(s) deleted from Excel!");
+
+                showToast("Deleted from Excel successfully! Reloading...");
+                selectedRows.clear();
+                
+                // Wait 1.5 seconds for OneDrive to update the Excel file before reading back
+                setTimeout(async () => {
+                    await loadTableData();
+                }, 1500);
+
             } catch (err) {
                 console.error(err);
-                alert("Network error contacting Delete Flow.");
+                alert("Network error: Could not reach Power Automate Delete Flow.");
             }
         }
 
