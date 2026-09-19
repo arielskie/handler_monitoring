@@ -3,583 +3,625 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample Handler Repair Monitoring</title>
+    <title>Excel Data Table - Handler Monitoring</title>
     <link rel="icon" href="data:,">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #f8fafc;
-            --card-bg: #ffffff;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --radius-lg: 16px;
-            --radius-md: 10px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --bg-body: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --primary: #10b981;
+            --danger: #ef4444;
+            --row-hover: #f8fafc;
+            --row-selected: #f0fdf4;
+            --cell-padding-y: 9px;
+            --cell-padding-x: 12px;
+            --font-size: 13px;
         }
 
-        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body.density-compact { --cell-padding-y: 5px; --font-size: 12px; }
+        body.density-normal { --cell-padding-y: 9px; --font-size: 13px; }
+        body.density-relaxed { --cell-padding-y: 14px; --font-size: 14px; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-dark);
-            margin: 0;
-            padding: 24px;
-            width: 100vw;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .dashboard-container {
-            width: 100%;
-            max-width: 100%;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            overflow: hidden;
         }
 
-        .dashboard-header {
+        .app-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .header-title h1 { font-size: 26px; font-weight: 700; margin: 0; color: var(--text-dark); letter-spacing: -0.5px; }
-        .header-title p { font-size: 14px; color: var(--text-muted); margin: 4px 0 0 0; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            width: 100%;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-        }
-        .stat-card .label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--text-dark); margin-top: 8px; }
-
-        .main-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-md);
-            padding: 24px;
-            width: 100%;
-        }
-
-        .toolbar {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: 16px;
-            margin-bottom: 20px;
         }
-        .search-filter-group {
-            display: flex;
-            gap: 12px;
-            flex: 1;
-            max-width: 500px;
-        }
-        .input-control {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            outline: none;
-            transition: all 0.2s;
-            background: #f8fafc;
-        }
-        .input-control:focus {
-            border-color: var(--primary);
-            background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        .search-input { flex: 2; }
-        .filter-select { flex: 1; cursor: pointer; }
 
-        .btn {
-            padding: 8px 14px;
-            border-radius: var(--radius-md);
-            font-size: 13px;
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .sheet-icon {
+            background: #10b981;
+            color: #fff;
+            width: 28px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .title-group h1 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .badge-live {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
             font-weight: 600;
-            border: none;
+        }
+        .title-meta { font-size: 12px; color: var(--text-secondary); }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+
+        .btn-ui {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s;
-            white-space: nowrap;
+            transition: all 0.15s;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-edit { background: #f1f5f9; color: #334155; }
-        .btn-edit:hover { background: #e2e8f0; }
-        .btn-delete { background: #fef2f2; color: #dc2626; }
-        .btn-delete:hover { background: #fee2e2; }
-        .btn-save { background: #dcfce7; color: #15803d; }
-        .btn-save:hover { background: #bbf7d0; }
-        .btn-cancel { background: #f1f5f9; color: #64748b; }
+        .btn-ui:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-primary { background: #10b981; color: #ffffff; border-color: #059669; }
+        .btn-primary:hover { background: #059669; }
+        .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
-        .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th {
-            padding: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-color);
-            background: #ffffff;
-            position: sticky;
-            top: 0;
-            white-space: nowrap;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-dark);
-            vertical-align: middle;
-        }
-        tr:hover td { background-color: #f8fafc; }
-
-        .badge {
+        .auth-badge {
+            font-size: 12px;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 11px;
             font-weight: 600;
-            display: inline-block;
+        }
+        .auth-badge.logged-in { background: #dbeafe; color: #1e40af; }
+        .auth-badge.logged-out { background: #f1f5f9; color: #64748b; }
+
+        .sub-bar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .search-box { position: relative; max-width: 380px; width: 100%; }
+        .search-box input {
+            width: 100%;
+            padding: 6px 10px 6px 30px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .table-wrap {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            background: #fff;
+        }
+
+        table.sheet-table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: var(--font-size);
+        }
+
+        th, td {
+            padding: var(--cell-padding-y) var(--cell-padding-x);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
             white-space: nowrap;
         }
-        .status-Active { background: #fef2f2; color: #dc2626; }
-        .status-Pending { background: #fffbeb; color: #d97706; }
-        .status-Resolved { background: #f0fdf4; color: #16a34a; }
 
-        .cell-img {
-            max-width: 90px;
-            max-height: 60px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            object-fit: cover;
+        th {
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            user-select: none;
+        }
+
+        .col-check { width: 36px; text-align: center; }
+        .col-num { width: 44px; text-align: center; color: var(--text-muted); font-size: 11px; }
+
+        body.is-readonly .col-check { display: none !important; }
+
+        tr:hover td { background-color: var(--row-hover); }
+        tr.selected td { background-color: var(--row-selected); }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-Active { background: #fee2e2; color: #b91c1c; }
+        .status-Pending { background: #fef3c7; color: #b45309; }
+        .status-Resolved { background: #dcfce7; color: #15803d; }
+
+        .add-row-strip {
+            padding: 8px 16px;
+            color: #059669;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
         }
-        .cell-img:hover { transform: scale(1.1); }
+        .add-row-strip:hover { background: #f0fdf4; }
 
-        #alertToast {
-            display: none;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 16px;
+        .app-footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 6px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-secondary);
         }
-        .toast-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        .toast-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: #fff;
+            border-radius: 12px;
+            width: 340px;
+            padding: 24px;
+        }
+        .modal-card input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 18px;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+            z-index: 1100;
+        }
     </style>
 </head>
-<body>
+<body class="density-normal is-readonly">
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-title">
-            <h1>Sample Handler Repair Monitoring</h1>
-            <p>Real-time database records and repair tracking</p>
-        </div>
-        <button class="btn btn-primary" onclick="addNewRow()">+ Add New Entry</button>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="label">Total Records</div>
-            <div class="value" id="statTotal">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">Active Events</div>
-            <div class="value" id="statActive" style="color: #dc2626;">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">Pending Review</div>
-            <div class="value" id="statPending" style="color: #d97706;">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">Resolved</div>
-            <div class="value" id="statResolved" style="color: #16a34a;">0</div>
-        </div>
-    </div>
-
-    <div class="main-card">
-        <div id="alertToast"></div>
-
-        <div class="toolbar">
-            <div class="search-filter-group">
-                <input type="text" id="searchInput" class="input-control search-input" placeholder="Search Handler, Problem, or Cause..." oninput="filterData()">
-                <select id="statusFilter" class="input-control filter-select" onchange="filterData()">
-                    <option value="ALL">All Statuses</option>
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Resolved">Resolved</option>
-                </select>
+    <header class="app-header">
+        <div class="header-left">
+            <div class="sheet-icon">田</div>
+            <div class="title-group">
+                <h1>Excel Data Table <span class="badge-live">Live Sync</span></h1>
+                <div class="title-meta" id="headerSummary">Connecting to Excel...</div>
             </div>
-            <button class="btn btn-edit" onclick="loadTableData()">↻ Refresh Data</button>
         </div>
+        <div class="header-actions">
+            <span id="authStatusBadge" class="auth-badge logged-out">🔒 Viewer (Read Only)</span>
+            <button id="authBtn" class="btn-ui" onclick="toggleAuthModal()">Login to Edit</button>
+            <button class="btn-ui btn-danger" id="bulkDeleteBtn" style="display:none;" onclick="deleteSelectedRows()">Delete Selected</button>
+            <button class="btn-ui" onclick="loadTableData()">↻ Refresh</button>
+            <button class="btn-ui btn-primary" onclick="addNewRow()">+ Add Row</button>
+        </div>
+    </header>
 
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>WW</th>
-                        <th>DATE</th>
-                        <th>TESTER ID</th>
-                        <th>HANDLER ID</th>
-                        <th>Handler Major Part</th>
-                        <th>PROBLEM</th>
-                        <th>ROOT CAUSE</th>
-                        <th>DETAILS (Image as Evidence)</th>
-                        <th>MATERIAL CODE</th>
-                        <th>Stock / Non Stock</th>
-                        <th>PENDING ACTION</th>
-                        <th>STATUS</th>
-                        <th>ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable">
-                    <tr><td colspan="13" style="text-align:center; color: var(--text-muted); padding:30px;">Loading records...</td></tr>
-                </tbody>
-            </table>
+    <div class="sub-bar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search across all fields..." oninput="renderTable()">
         </div>
     </div>
-</div>
 
-<script>
-    // 1. Read Handler Monitoring (Fetch Rows)
-    const readUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/33cda42ea60b487ea12bc6d6b2fb094d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-W97iRQOOSQ0lRc9j2WefBnqQegAXIPRvQHX1I2bNOU";
+    <div class="table-wrap">
+        <table class="sheet-table">
+            <thead>
+                <tr>
+                    <th class="col-check"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                    <th class="col-num">#</th>
+                    <th>WW</th>
+                    <th>DATE</th>
+                    <th>TESTER ID</th>
+                    <th>HANDLER ID</th>
+                    <th>Handler Major Part</th>
+                    <th>PROBLEM</th>
+                    <th>ROOT CAUSE</th>
+                    <th>DETAILS</th>
+                    <th>MATERIAL CODE</th>
+                    <th>Stock Items</th>
+                    <th>PENDING ACTION</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody">
+                <tr><td colspan="14" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading live data...</td></tr>
+            </tbody>
+        </table>
+        <div class="add-row-strip" onclick="addNewRow()">+ Click to Add Row</div>
+    </div>
 
-    // 2. Handler Monitoring (Add Row)
-    const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
+    <footer class="app-footer">
+        <div id="footerCount">Showing 0 items</div>
+        <div id="footerTip">Log in to edit or delete records.</div>
+    </footer>
 
-    let rawData = [];
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-card">
+            <h3 style="margin-bottom: 6px;">Login to Edit</h3>
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">Enter credentials to unlock editing.</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="loginUsername" placeholder="Username (Default: admin)" required>
+                <input type="password" id="loginPassword" placeholder="Password (Default: admin123)" required>
+                <div style="display:flex; justify-content: flex-end; gap:8px;">
+                    <button type="button" class="btn-ui" onclick="toggleAuthModal()">Cancel</button>
+                    <button type="submit" class="btn-ui btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    async function loadTableData() {
-        try {
-            const response = await fetch(readUrl, {
+    <div id="toast"></div>
+
+    <script>
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "admin123";
+
+        // Power Automate Endpoints
+        const readUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/33cda42ea60b487ea12bc6d6b2fb094d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-W97iRQOOSQ0lRc9j2WefBnqQegAXIPRvQHX1I2bNOU";
+        const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
+        const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b4e3ca791183425e99995266ab810738/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
+
+        let rawData = [];
+        let selectedRows = new Set();
+        let isLoggedIn = sessionStorage.getItem('app_user_logged_in') === 'true';
+
+        const columns = [
+            { key: 'WW', label: 'WW' },
+            { key: 'DATE', label: 'DATE' },
+            { key: 'TESTER ID', label: 'TESTER ID' },
+            { key: 'HANDLER ID', label: 'HANDLER ID' },
+            { key: 'Handler Major Part', label: 'Handler Major Part' },
+            { key: 'PROBLEM', label: 'PROBLEM' },
+            { key: 'ROOT CAUSE', label: 'ROOT CAUSE' },
+            { key: 'DETAILS', label: 'DETAILS' },
+            { key: 'MATERIAL CODE', label: 'MATERIAL CODE' },
+            { key: 'STOCK ITEMS', label: 'Stock Items' },
+            { key: 'PENDING ACTION', label: 'PENDING ACTION' },
+            { key: 'STATUS', label: 'STATUS' }
+        ];
+
+        // Safe fetch that avoids CORS preflight blocks
+        async function safePost(url, dataObj) {
+            return await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(dataObj)
+            });
+        }
+
+        function checkAuthUI() {
+            const badge = document.getElementById('authStatusBadge');
+            const authBtn = document.getElementById('authBtn');
+            const footerTip = document.getElementById('footerTip');
+
+            if (isLoggedIn) {
+                document.body.classList.remove('is-readonly');
+                document.body.classList.add('is-admin');
+                badge.className = "auth-badge logged-in";
+                badge.innerHTML = "🔓 Admin (Full Access)";
+                authBtn.innerText = "Logout";
+                authBtn.className = "btn-ui btn-danger";
+                footerTip.innerText = "Logged in: Select rows to delete, or click '+ Add Row'.";
+            } else {
+                document.body.classList.remove('is-admin');
+                document.body.classList.add('is-readonly');
+                badge.className = "auth-badge logged-out";
+                badge.innerHTML = "🔒 Viewer (Read Only)";
+                authBtn.innerText = "Login to Edit";
+                authBtn.className = "btn-ui";
+                footerTip.innerText = "🔒 Read-only mode. Log in to add or delete rows.";
+            }
+        }
+
+        function toggleAuthModal() {
+            if (isLoggedIn) {
+                isLoggedIn = false;
+                sessionStorage.removeItem('app_user_logged_in');
+                selectedRows.clear();
+                checkAuthUI();
+                renderTable();
+                showToast("Logged out");
+            } else {
+                const modal = document.getElementById('loginModal');
+                modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('loginUsername').value === ADMIN_USER &&
+                document.getElementById('loginPassword').value === ADMIN_PASS) {
+                isLoggedIn = true;
+                sessionStorage.setItem('app_user_logged_in', 'true');
+                document.getElementById('loginModal').style.display = 'none';
+                checkAuthUI();
+                renderTable();
+                showToast("Logged in successfully!");
+            } else {
+                alert("Invalid username or password");
+            }
+        }
+
+        async function loadTableData() {
+            try {
+                showToast("Reading Excel records...");
+                const response = await safePost(readUrl, {});
+                const textData = await response.text();
+                let data = JSON.parse(textData);
+
+                let list = Array.isArray(data) ? data : (data.value || (data.body && data.body.value) || []);
+                
+                // Keep only valid rows
+                rawData = list.filter(r => {
+                    const str = Object.values(r).join('').trim();
+                    return str.length > 0 && str !== 'null';
+                });
+
+                renderTable();
+                showToast(`Loaded ${rawData.length} rows`);
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to fetch records. Make sure you use http://localhost:8080!");
+            }
+        }
+
+        function getVal(row, key) {
+            if (!row) return '';
+            if (row[key] !== undefined && row[key] !== null) return row[key];
+
+            const aliases = {
+                'WW': ['WW', 'ww'],
+                'DATE': ['DATE', 'Date'],
+                'TESTER ID': ['TESTER ID', 'TESTER_ID', 'TESTER_x0020_ID'],
+                'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID'],
+                'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'Handler_x0020_Major_x0020_Part'],
+                'PROBLEM': ['PROBLEM', 'Problem'],
+                'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'ROOT_x0020_CAUSE'],
+                'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS'],
+                'MATERIAL CODE': ['MATERIAL CODE', 'Material Code'],
+                'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'StockItems'],
+                'PENDING ACTION': ['PENDING ACTION', 'Pending Action'],
+                'STATUS': ['STATUS', 'Status']
+            };
+
+            const checks = aliases[key] || [key];
+            for (const k of checks) {
+                if (row[k] !== undefined && row[k] !== null) return row[k];
+            }
+
+            const cleanTarget = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+            for (const actualKey of Object.keys(row)) {
+                const cleanActual = actualKey.toLowerCase().replace(/_x[0-9a-f]{4}_/gi, '').replace(/[^a-z0-9]/g, '');
+                if (cleanActual === cleanTarget && row[actualKey] !== undefined && row[actualKey] !== null) {
+                    return row[actualKey];
+                }
+            }
+            return '';
+        }
+
+        function renderTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            const filtered = rawData.filter(row => {
+                return columns.some(col => String(getVal(row, col.key)).toLowerCase().includes(query));
             });
 
-            const textData = await response.text();
-            let data;
-
-            try {
-                data = JSON.parse(textData);
-            } catch (e) {
-                console.error("Response is not valid JSON:", textData);
-                showToast("Server returned invalid data format. Check Power Automate flow.", "toast-error");
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:30px; color:#94a3b8;">No matching records found</td></tr>`;
+                updateCounters(0);
                 return;
             }
 
-            if (Array.isArray(data)) {
-                rawData = data;
-            } else if (Array.isArray(data.value)) {
-                rawData = data.value;
-            } else if (data.body && Array.isArray(data.body.value)) {
-                rawData = data.body.value;
-            } else {
-                console.warn("Received unexpected payload:", data);
-                rawData = [];
+            filtered.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                if (selectedRows.has(idx)) tr.classList.add('selected');
+
+                let html = `
+                    <td class="col-check"><input type="checkbox" ${selectedRows.has(idx) ? 'checked' : ''} onclick="toggleRowSelect(${idx}, event)"></td>
+                    <td class="col-num">${idx + 1}</td>
+                `;
+
+                columns.forEach(col => {
+                    const val = getVal(row, col.key);
+                    if (col.key === 'STATUS') {
+                        const st = val || 'Active';
+                        html += `<td><span class="badge status-${st}">${st}</span></td>`;
+                    } else {
+                        html += `<td>${val !== '' ? val : '-'}</td>`;
+                    }
+                });
+
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+
+            updateCounters(filtered.length);
+        }
+
+        async function addNewRow() {
+            if (!isLoggedIn) {
+                showToast("🔒 Log in to add rows");
+                toggleAuthModal();
+                return;
             }
 
-            updateStats();
-            filterData();
-        } catch (err) {
-            console.error("Fetch failed:", err);
-            showToast("Failed to fetch database records.", "toast-error");
-        }
-    }
+            const hndId = "08M" + Math.floor(10000 + Math.random() * 90000);
+            
+            // Matches your Write flow schema
+            const newEntry = {
+                "WW": "WW2644",
+                "DATE": new Date().toISOString().split('T')[0],
+                "TESTER_ID": "130CTS",
+                "HANDLER_ID": hndId,
+                "MajorPart": "Guide Lever",
+                "PROBLEM": "Replaced worn part",
+                "ROOT_CAUSE": "Wear and tear",
+                "DETAILS": "",
+                "MATERIAL_CODE": "MC-01",
+                "StockItems": "Stock Items",
+                "PENDING_ACTION": "None",
+                "STATUS": "Active"
+            };
 
-    function updateStats() {
-        if (!Array.isArray(rawData)) return;
-        document.getElementById('statTotal').innerText = rawData.length;
-        document.getElementById('statActive').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Active').length;
-        document.getElementById('statPending').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Pending').length;
-        document.getElementById('statResolved').innerText = rawData.filter(r => getVal(r, 'STATUS') === 'Resolved').length;
-    }
+            // 1. Instant optimistic update on screen
+            rawData.unshift(newEntry);
+            renderTable();
+            showToast("Saving new entry to Excel...");
 
-    function getVal(row, key) {
-        if (!row) return '';
-        const aliases = {
-            'WW': ['WW', 'ww'],
-            'DATE': ['DATE', 'Date', 'date'],
-            'TESTER ID': ['TESTER ID', 'TESTER_ID', 'Tester ID', 'testerId'],
-            'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'Handler ID', 'handlerId', 'EventName'],
-            'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'majorPart'],
-            'PROBLEM': ['PROBLEM', 'Problem', 'problem'],
-            'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'Root Cause', 'rootCause'],
-            'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS', 'Details', 'details'],
-            'MATERIAL CODE': ['MATERIAL CODE', 'Material Code', 'materialCode'],
-            'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'stockItems'],
-            'PENDING ACTION': ['PENDING ACTION', 'Pending Action', 'pendingAction'],
-            'STATUS': ['STATUS', 'Status', 'status']
-        };
+            // 2. Sync to Excel
+            try {
+                const response = await safePost(writeUrl, newEntry);
+                const resultText = await response.text();
 
-        const keysToCheck = aliases[key] || [key];
-        for (const k of keysToCheck) {
-            if (row[k] !== undefined && row[k] !== null) return row[k];
-        }
-        return '';
-    }
-
-    function filterData() {
-        if (!Array.isArray(rawData)) return;
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const selectedStatus = document.getElementById('statusFilter').value;
-
-        const filtered = rawData.filter(row => {
-            const handlerId = String(getVal(row, 'HANDLER ID')).toLowerCase();
-            const problem = String(getVal(row, 'PROBLEM')).toLowerCase();
-            const cause = String(getVal(row, 'ROOT CAUSE')).toLowerCase();
-            const status = getVal(row, 'STATUS');
-
-            const matchesSearch = handlerId.includes(searchTerm) || problem.includes(searchTerm) || cause.includes(searchTerm);
-            const matchesStatus = selectedStatus === 'ALL' || status === selectedStatus;
-
-            return matchesSearch && matchesStatus;
-        });
-
-        renderTable(filtered);
-    }
-
-    function renderTable(dataArray) {
-        const tbody = document.getElementById('dataTable');
-        tbody.innerHTML = '';
-
-        if (!dataArray || dataArray.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; color: var(--text-muted); padding:30px;">No matching records found.</td></tr>';
-            return;
-        }
-
-        dataArray.forEach((row, index) => {
-            const tr = document.createElement('tr');
-            tr.id = `row-${index}`;
-
-            const imgVal = getVal(row, 'DETAILS');
-            const isImage = imgVal.startsWith('data:image') || imgVal.startsWith('http');
-            const imgHtml = isImage 
-                ? `<a href="${imgVal}" target="_blank"><img src="${imgVal}" class="cell-img" alt="Evidence"></a>` 
-                : (imgVal ? imgVal : '<span style="color:#94a3b8; font-size:11px;">No image</span>');
-
-            const statusVal = getVal(row, 'STATUS') || 'Active';
-
-            tr.innerHTML = `
-                <td>${getVal(row, 'WW')}</td>
-                <td>${getVal(row, 'DATE')}</td>
-                <td>${getVal(row, 'TESTER ID')}</td>
-                <td><strong>${getVal(row, 'HANDLER ID')}</strong></td>
-                <td>${getVal(row, 'Handler Major Part')}</td>
-                <td>${getVal(row, 'PROBLEM')}</td>
-                <td>${getVal(row, 'ROOT CAUSE')}</td>
-                <td>${imgHtml}</td>
-                <td>${getVal(row, 'MATERIAL CODE')}</td>
-                <td>${getVal(row, 'STOCK ITEMS')}</td>
-                <td>${getVal(row, 'PENDING ACTION')}</td>
-                <td><span class="badge status-${statusVal}">${statusVal}</span></td>
-                <td>
-                    <button class="btn btn-edit" onclick="editRow(${index})">Edit</button>
-                    <button class="btn btn-delete" onclick="deleteRow(${index})">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function addNewRow() {
-        if (document.getElementById('new-row')) return;
-
-        const tbody = document.getElementById('dataTable');
-        const tr = document.createElement('tr');
-        tr.id = 'new-row';
-        tr.innerHTML = `
-            <td><input type="text" id="new-ww" class="input-control" placeholder="WW" style="width:60px;"></td>
-            <td><input type="date" id="new-date" class="input-control" style="width:110px;"></td>
-            <td><input type="text" id="new-tester" class="input-control" placeholder="Tester ID" style="width:80px;"></td>
-            <td><input type="text" id="new-handler" class="input-control" placeholder="Handler ID" style="width:90px;"></td>
-            <td><input type="text" id="new-majorpart" class="input-control" placeholder="Major Part" style="width:80px;"></td>
-            <td><input type="text" id="new-problem" class="input-control" placeholder="Problem" style="width:100px;"></td>
-            <td><input type="text" id="new-cause" class="input-control" placeholder="Root Cause" style="width:100px;"></td>
-            <td><input type="file" id="new-image-file" class="input-control" accept="image/*" style="width:120px;"></td>
-            <td><input type="text" id="new-material" class="input-control" placeholder="Material Code" style="width:90px;"></td>
-            <td>
-                <select id="new-stock" class="input-control" style="width:90px;">
-                    <option value="Stock Items">Stock Items</option>
-                    <option value="Non Stock Items">Non Stock Items</option>
-                </select>
-            </td>
-            <td><input type="text" id="new-pending" class="input-control" placeholder="Pending Action" style="width:100px;"></td>
-            <td>
-                <select id="new-status" class="input-control" style="width:85px;">
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Resolved">Resolved</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn btn-save" onclick="saveNewRow()">Save</button>
-                <button class="btn btn-cancel" onclick="filterData()">Cancel</button>
-            </td>
-        `;
-        tbody.prepend(tr);
-    }
-
-    async function saveNewRow() {
-        const handlerId = document.getElementById('new-handler').value;
-        const problem = document.getElementById('new-problem').value;
-        const fileInput = document.getElementById('new-image-file');
-
-        if (!handlerId || !problem) {
-            showToast("Please enter HANDLER ID and PROBLEM.", "toast-error");
-            return;
-        }
-
-        let imageBase64 = "";
-        if (fileInput.files && fileInput.files[0]) {
-            const file = fileInput.files[0];
-            imageBase64 = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsDataURL(file);
-            });
-        }
-
-        const payload = {
-            "WW": document.getElementById('new-ww').value,
-            "DATE": document.getElementById('new-date').value,
-            "TESTER ID": document.getElementById('new-tester').value,
-            "HANDLER ID": handlerId,
-            "Handler Major Part": document.getElementById('new-majorpart').value,
-            "PROBLEM": problem,
-            "ROOT CAUSE": document.getElementById('new-cause').value,
-            "DETAILS\n(Image as Evidence)": imageBase64,
-            "MATERIAL CODE": document.getElementById('new-material').value,
-            "Stock Items\nNon Stock Items": document.getElementById('new-stock').value,
-            "PENDING ACTION": document.getElementById('new-pending').value,
-            "STATUS": document.getElementById('new-status').value
-        };
-
-        try {
-            const response = await fetch(writeUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                showToast("New record saved successfully!", "toast-success");
-                loadTableData();
-            } else {
-                showToast("Failed to save record.", "toast-error");
+                if (response.ok) {
+                    showToast("Row saved into Excel successfully!");
+                } else {
+                    console.error("Write error:", resultText);
+                    alert("Power Automate rejected the row:\n" + resultText);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Network error: Make sure you are on http://localhost:8080 and not file:///");
             }
-        } catch (err) {
-            console.error("Save error:", err);
-            showToast("Error sending data to server.", "toast-error");
         }
-    }
 
-    function editRow(index) {
-        const row = rawData[index];
-        const tr = document.getElementById(`row-${index}`);
-        const statusVal = getVal(row, 'STATUS') || 'Active';
-        const stockVal = getVal(row, 'STOCK ITEMS') || 'Stock Items';
+        async function deleteSelectedRows() {
+            if (!isLoggedIn || selectedRows.size === 0) return;
 
-        tr.innerHTML = `
-            <td><input type="text" id="edit-ww-${index}" class="input-control" value="${getVal(row, 'WW')}" style="width:60px;"></td>
-            <td><input type="text" id="edit-date-${index}" class="input-control" value="${getVal(row, 'DATE')}" style="width:110px;"></td>
-            <td><input type="text" id="edit-tester-${index}" class="input-control" value="${getVal(row, 'TESTER ID')}" style="width:80px;"></td>
-            <td><input type="text" id="edit-handler-${index}" class="input-control" value="${getVal(row, 'HANDLER ID')}" style="width:90px;"></td>
-            <td><input type="text" id="edit-majorpart-${index}" class="input-control" value="${getVal(row, 'Handler Major Part')}" style="width:80px;"></td>
-            <td><input type="text" id="edit-problem-${index}" class="input-control" value="${getVal(row, 'PROBLEM')}" style="width:100px;"></td>
-            <td><input type="text" id="edit-cause-${index}" class="input-control" value="${getVal(row, 'ROOT CAUSE')}" style="width:100px;"></td>
-            <td><input type="file" id="edit-image-file-${index}" class="input-control" accept="image/*" style="width:120px;"></td>
-            <td><input type="text" id="edit-material-${index}" class="input-control" value="${getVal(row, 'MATERIAL CODE')}" style="width:90px;"></td>
-            <td>
-                <select id="edit-stock-${index}" class="input-control" style="width:90px;">
-                    <option value="Stock Items" ${stockVal === 'Stock Items' ? 'selected' : ''}>Stock Items</option>
-                    <option value="Non Stock Items" ${stockVal === 'Non Stock Items' ? 'selected' : ''}>Non Stock Items</option>
-                </select>
-            </td>
-            <td><input type="text" id="edit-pending-${index}" class="input-control" value="${getVal(row, 'PENDING ACTION')}" style="width:100px;"></td>
-            <td>
-                <select id="edit-status-${index}" class="input-control" style="width:85px;">
-                    <option value="Active" ${statusVal === 'Active' ? 'selected' : ''}>Active</option>
-                    <option value="Pending" ${statusVal === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Resolved" ${statusVal === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn btn-save" onclick="saveEdit(${index})">Save</button>
-                <button class="btn btn-cancel" onclick="filterData()">Cancel</button>
-            </td>
-        `;
-    }
+            const count = selectedRows.size;
+            if (!confirm(`Permanently delete ${count} row(s) from Excel?`)) return;
 
-    async function saveEdit(index) {
-        const fileInput = document.getElementById(`edit-image-file-${index}`);
-
-        rawData[index]["WW"] = document.getElementById(`edit-ww-${index}`).value;
-        rawData[index]["DATE"] = document.getElementById(`edit-date-${index}`).value;
-        rawData[index]["TESTER ID"] = document.getElementById(`edit-tester-${index}`).value;
-        rawData[index]["HANDLER ID"] = document.getElementById(`edit-handler-${index}`).value;
-        rawData[index]["Handler Major Part"] = document.getElementById(`edit-majorpart-${index}`).value;
-        rawData[index]["PROBLEM"] = document.getElementById(`edit-problem-${index}`).value;
-        rawData[index]["ROOT CAUSE"] = document.getElementById(`edit-cause-${index}`).value;
-        rawData[index]["MATERIAL CODE"] = document.getElementById(`edit-material-${index}`).value;
-        rawData[index]["Stock Items\nNon Stock Items"] = document.getElementById(`edit-stock-${index}`).value;
-        rawData[index]["PENDING ACTION"] = document.getElementById(`edit-pending-${index}`).value;
-        rawData[index]["STATUS"] = document.getElementById(`edit-status-${index}`).value;
-
-        if (fileInput.files && fileInput.files[0]) {
-            const file = fileInput.files[0];
-            rawData[index]["DETAILS\n(Image as Evidence)"] = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsDataURL(file);
+            // Collect handler IDs to delete
+            const idsToDelete = [];
+            selectedRows.forEach(idx => {
+                const hnd = getVal(rawData[idx], 'HANDLER ID');
+                if (hnd) idsToDelete.push(hnd);
             });
+
+            // 1. Instant optimistic removal from screen
+            rawData = rawData.filter((_, idx) => !selectedRows.has(idx));
+            selectedRows.clear();
+            renderTable();
+            showToast(`Deleting ${idsToDelete.length} row(s) from Excel...`);
+
+            // 2. Sync deletes to Excel
+            try {
+                for (let hndId of idsToDelete) {
+                    const response = await safePost(deleteUrl, { "HANDLER_ID": hndId });
+                    if (!response.ok) {
+                        const err = await response.text();
+                        console.error(`Failed to delete ${hndId}:`, err);
+                    }
+                }
+                showToast("Selected row(s) deleted from Excel!");
+            } catch (err) {
+                console.error(err);
+                alert("Network error contacting Delete Flow.");
+            }
         }
 
-        showToast("Record updated successfully.", "toast-success");
-        updateStats();
-        filterData();
-    }
+        function updateCounters(displayed) {
+            document.getElementById('headerSummary').innerText = `${rawData.length} records in Excel`;
+            document.getElementById('footerCount').innerText = `Showing ${displayed} of ${rawData.length} items`;
 
-    function deleteRow(index) {
-        if (confirm("Are you sure you want to remove this record?")) {
-            rawData.splice(index, 1);
-            showToast("Record deleted.", "toast-success");
-            updateStats();
-            filterData();
+            const bulkBtn = document.getElementById('bulkDeleteBtn');
+            if (isLoggedIn && selectedRows.size > 0) {
+                bulkBtn.style.display = 'inline-flex';
+                bulkBtn.innerText = `Delete Selected (${selectedRows.size})`;
+            } else {
+                bulkBtn.style.display = 'none';
+            }
         }
-    }
 
-    function showToast(msg, type) {
-        const toast = document.getElementById('alertToast');
-        toast.className = type;
-        toast.innerText = msg;
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 3500);
-    }
+        function toggleRowSelect(idx, e) {
+            e.stopPropagation();
+            if (!isLoggedIn) return;
+            if (selectedRows.has(idx)) selectedRows.delete(idx);
+            else selectedRows.add(idx);
+            renderTable();
+        }
 
-    loadTableData();
-</script>
+        function toggleSelectAll(master) {
+            if (!isLoggedIn) return;
+            if (master.checked) rawData.forEach((_, idx) => selectedRows.add(idx));
+            else selectedRows.clear();
+            renderTable();
+        }
 
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+
+        checkAuthUI();
+        loadTableData();
+    </script>
 </body>
 </html>
