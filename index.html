@@ -161,7 +161,7 @@
         .col-check { width: 36px; text-align: center; }
         .col-num { width: 44px; text-align: center; color: var(--text-muted); font-size: 11px; }
 
-        /* Strictly hidden when logged out */
+        /* Hidden when not logged in */
         body.is-readonly .col-check { display: none !important; }
 
         tr:hover td { background-color: var(--row-hover); }
@@ -321,10 +321,14 @@
         const ADMIN_USER = "admin";
         const ADMIN_PASS = "admin123";
 
-        // Power Automate URLs
+        // Read Flow
         const readUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/33cda42ea60b487ea12bc6d6b2fb094d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-W97iRQOOSQ0lRc9j2WefBnqQegAXIPRvQHX1I2bNOU";
+
+        // Write Flow (Add Row)
         const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
-        const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b4e3ca791183425e99995266ab810738/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
+
+        // Quick Delete Flow (Matches flow d60ae72d in your screenshot)
+        const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d60ae72d905c452995d766f217d497c6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
 
         let rawData = [];
         let selectedRows = new Set();
@@ -394,7 +398,7 @@
                 renderTable();
                 showToast("Logged in successfully!");
             } else {
-                alert("Invalid username or password");
+                alert("Invalid credentials");
             }
         }
 
@@ -419,7 +423,7 @@
                 });
 
                 renderTable();
-                showToast(`Loaded ${rawData.length} active rows`);
+                showToast(`Loaded ${rawData.length} rows`);
             } catch (err) {
                 console.error(err);
                 showToast("Error loading Excel records");
@@ -524,7 +528,7 @@
                 "STATUS": "Active"
             };
 
-            showToast("Saving row to Excel Online...");
+            showToast("Saving row to Excel...");
 
             try {
                 const response = await fetch(writeUrl, {
@@ -534,8 +538,8 @@
                 });
 
                 if (response.ok) {
-                    showToast("Row saved! Refreshing...");
-                    await loadTableData();
+                    showToast("Row saved! Reloading...");
+                    setTimeout(loadTableData, 1500);
                 } else {
                     const err = await response.text();
                     alert("Power Automate Error on Add:\n" + err);
@@ -550,9 +554,9 @@
             if (!isLoggedIn || selectedRows.size === 0) return;
 
             const count = selectedRows.size;
-            if (!confirm(`Delete ${count} row(s) directly from Excel?`)) return;
+            if (!confirm(`Permanently delete ${count} row(s) from Excel?`)) return;
 
-            // Collect exact Handler IDs
+            // Collect exact IDs
             const idsToDelete = [];
             selectedRows.forEach(idx => {
                 const hnd = getVal(rawData[idx], 'HANDLER ID');
@@ -568,7 +572,7 @@
 
             try {
                 for (let hndId of idsToDelete) {
-                    console.log("Sending delete request for HANDLER_ID:", hndId);
+                    console.log("Deleting HANDLER_ID:", hndId);
 
                     const response = await fetch(deleteUrl, {
                         method: 'POST',
@@ -579,18 +583,18 @@
                     if (!response.ok) {
                         const err = await response.text();
                         console.error(`Delete failed for ${hndId}:`, err);
-                        alert(`Power Automate failed to delete ${hndId}:\n${err}`);
+                        alert(`Power Automate returned an error:\n${err}`);
                         return;
                     }
                 }
 
-                showToast("Deleted from Excel successfully! Reloading...");
+                showToast("Row(s) deleted from Excel! Reloading...");
                 selectedRows.clear();
                 
-                // Wait 1.5 seconds for OneDrive to update the Excel file before reading back
+                // Wait 2 seconds for OneDrive to commit the changes before re-reading
                 setTimeout(async () => {
                     await loadTableData();
-                }, 1500);
+                }, 2000);
 
             } catch (err) {
                 console.error(err);
