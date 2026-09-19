@@ -326,7 +326,7 @@
         // Write Flow (Add Row)
         const writeUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60eeb9c1879249f79dea375e12bfb527/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aFIZCX9EK8H4QTmltyJtonb_mLDhEi27kQHK_EoglAw";
 
-        // Your Exact Quick Delete Flow URL
+        // Quick Delete Flow
         const deleteUrl = "https://defaulteaa689b48f8740e09c6f7228de4d75.4a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b4e3ca791183425e99995266ab810738/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Vy2Jtiuem6SIKGtMW2bSujFxI-9HbF18hq2rQ8v8KoU";
 
         let rawData = [];
@@ -427,6 +427,18 @@
                 console.error(err);
                 showToast("Error loading Excel records");
             }
+        }
+
+        // Retrieves guaranteed Unique Row ID provided by Excel / Power Automate
+        function getUniqueRowId(row) {
+            if (!row) return '';
+            return row['__PowerAppsId__'] || 
+                   row['itemInternalId'] || 
+                   row['@odata.id'] || 
+                   row['ItemInternalId'] || 
+                   row['HANDLER ID'] || 
+                   row['HANDLER_ID'] || 
+                   '';
         }
 
         function getVal(row, key) {
@@ -555,45 +567,52 @@
             const count = selectedRows.size;
             if (!confirm(`Permanently delete ${count} row(s) directly from Excel?`)) return;
 
-            const idsToDelete = [];
+            // Collect unique internal row IDs
+            const itemsToDelete = [];
             selectedRows.forEach(idx => {
-                const hnd = getVal(rawData[idx], 'HANDLER ID');
-                if (hnd) idsToDelete.push(hnd);
+                const row = rawData[idx];
+                const rowId = getUniqueRowId(row);
+                if (rowId) {
+                    itemsToDelete.push(rowId);
+                }
             });
 
-            if (idsToDelete.length === 0) {
-                alert("Could not find a valid HANDLER ID for the selected row(s).");
+            if (itemsToDelete.length === 0) {
+                alert("Error: Could not retrieve a unique Row ID for this row.");
                 return;
             }
 
-            showToast(`Deleting ${idsToDelete.length} row(s) from Excel...`);
+            showToast(`Deleting ${itemsToDelete.length} row(s) from Excel...`);
 
             try {
-                for (let hndId of idsToDelete) {
-                    console.log("Sending delete request to Power Automate for HANDLER_ID:", hndId);
+                for (let rId of itemsToDelete) {
+                    console.log("Deleting Row ID:", rId);
 
                     const response = await fetch(deleteUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ "HANDLER_ID": hndId })
+                        body: JSON.stringify({ 
+                            "ROW_ID": rId,
+                            "HANDLER_ID": rId // Supports both schemas
+                        })
                     });
 
                     if (!response.ok) {
                         const err = await response.text();
-                        console.error(`Delete failed for ${hndId}:`, err);
-                        alert(`Power Automate returned an error deleting ${hndId}:\n${err}`);
+                        console.error(`Delete failed:`, err);
+                        alert(`Power Automate returned an error:\n${err}`);
                         return;
                     }
                 }
 
-                showToast("Deleted from Excel successfully! Waiting for OneDrive sync...");
-                
-                // 1. Instantly remove deleted rows locally so the UI updates immediately
+                showToast("Row(s) deleted from Excel successfully!");
+
+                // Optimistic instant UI update
                 rawData = rawData.filter((_, idx) => !selectedRows.has(idx));
                 selectedRows.clear();
                 renderTable();
 
-                // 2. Wait 2.5 seconds for OneDrive to commit and clear the file lock before fetching back
+                // Reload after OneDrive commit
                 setTimeout(async () => {
                     await loadTableData();
                 }, 2500);
