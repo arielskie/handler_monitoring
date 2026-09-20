@@ -3,370 +3,1897 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Data Table - Handler Monitoring</title>
+    <title>Handler Monitoring Dashboard</title>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
         :root {
-            --bg-body: #f8fafc;
-            --surface: #ffffff;
-            --border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
+            --cell-py: 13px;
+            --cell-px: 16px;
+            --font-size: 13.5px;
+            --thumb-size: 34px;
+            --row-height: 48px;
+
             --primary: #10b981;
             --primary-hover: #059669;
             --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --row-hover: #f8fafc;
-            --row-selected: #f0fdf4;
-            --cell-padding-y: 9px;
-            --cell-padding-x: 12px;
-            --font-size: 13px;
+            --accent-pink: #ec4899;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
         }
 
-        body.density-compact { --cell-padding-y: 5px; --font-size: 12px; }
-        body.density-normal { --cell-padding-y: 9px; --font-size: 13px; }
-        body.density-relaxed { --cell-padding-y: 14px; --font-size: 14px; }
+        body.density-compact {
+            --cell-py: 8px;
+            --cell-px: 14px;
+            --font-size: 12.5px;
+            --thumb-size: 28px;
+            --row-height: 38px;
+        }
+        body.density-normal {
+            --cell-py: 13px;
+            --cell-px: 16px;
+            --font-size: 13.5px;
+            --thumb-size: 34px;
+            --row-height: 48px;
+        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        /* 1. DARK THEME (Coffee Black + Ambient Orbs) */
+        body.theme-dark {
+            --bg-canvas: #100c0b;
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(26, 20, 18, 0.75);
+            --glass-card: rgba(30, 22, 20, 0.65);
+            --glass-card-hover: rgba(45, 33, 30, 0.85);
+            --glass-th: rgba(22, 16, 15, 0.95);
+            --glass-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+            --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+            --control-bg: rgba(255, 255, 255, 0.08);
+            --control-active: rgba(255, 255, 255, 0.2);
+            --row-hover-bg: rgba(255, 255, 255, 0.04);
+            --row-stripe-bg: rgba(255, 255, 255, 0.015);
+            --modal-bg: rgba(26, 19, 17, 0.96);
+            --sidebar-nav-hover: rgba(255, 255, 255, 0.06);
+            --sidebar-active-bg: rgba(236, 72, 153, 0.16);
+            --sidebar-active-text: #ec4899;
+        }
+
+        /* 2. LIGHT THEME (Rich Frosted Glassmorphism & Ambient Light) */
+        body.theme-light {
+            --bg-canvas: #edf1f7;
+            --text-main: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-card: rgba(255, 255, 255, 0.55);
+            --glass-card-hover: rgba(255, 255, 255, 0.75);
+            --glass-th: rgba(255, 255, 255, 0.65);
+            --glass-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 10px 28px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.85);
+            --control-bg: rgba(255, 255, 255, 0.6);
+            --control-active: #ffffff;
+            --row-hover-bg: rgba(255, 255, 255, 0.45);
+            --row-stripe-bg: rgba(255, 255, 255, 0.18);
+            --modal-bg: rgba(255, 255, 255, 0.88);
+            --sidebar-nav-hover: rgba(255, 255, 255, 0.4);
+            --sidebar-active-bg: rgba(236, 72, 153, 0.15);
+            --sidebar-active-text: #db2777;
+        }
 
         body {
-            background-color: var(--bg-body);
+            background-color: var(--bg-canvas);
             color: var(--text-main);
             height: 100vh;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .app-header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 20px;
+        /* Ambient Glow Orbs */
+        .ambient-shape {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(65px);
+            animation: float 20s ease-in-out infinite alternate;
+            transition: opacity 0.3s ease;
+        }
+        .shape-1 { width: 480px; height: 480px; top: -80px; left: 15%; background: radial-gradient(circle, #f97316 0%, #ec4899 65%, transparent 100%); opacity: 0.75; }
+        .shape-2 { width: 400px; height: 400px; bottom: -60px; right: 12%; background: radial-gradient(circle, #f59e0b 0%, #d97706 70%, transparent 100%); opacity: 0.68; animation-duration: 24s; }
+        .shape-3 { width: 340px; height: 340px; top: 30%; right: 2%; background: radial-gradient(circle, #ec4899 0%, #8b5cf6 70%, transparent 100%); opacity: 0.65; animation-duration: 18s; }
+        .shape-4 { width: 300px; height: 300px; bottom: 20%; left: 3%; background: radial-gradient(circle, #06b6d4 0%, #3b82f6 70%, transparent 100%); opacity: 0.55; animation-duration: 22s; }
+
+        body.theme-light .shape-1 { opacity: 0.62; filter: blur(75px); }
+        body.theme-light .shape-2 { opacity: 0.58; filter: blur(75px); }
+        body.theme-light .shape-3 { opacity: 0.52; filter: blur(75px); }
+        body.theme-light .shape-4 { opacity: 0.48; filter: blur(75px); }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-30px) scale(1.08); }
+            100% { transform: translateY(20px) scale(0.95); }
+        }
+
+        /* ---------------------------------------------------- */
+        /* LEFT SIDEBAR (Borderless & Seamless Merge with Header)*/
+        /* ---------------------------------------------------- */
+        .app-sidebar {
+            width: 260px;
+            min-width: 260px;
+            height: 100vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 16px;
+            z-index: 20;
+            border: none;
+            border-right: none !important;
+            box-shadow: none !important;
+            flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Collapsed Sidebar State */
+        .app-sidebar.collapsed {
+            width: 72px;
+            min-width: 72px;
+            padding: 20px 10px;
+            align-items: center;
+        }
+        .app-sidebar.collapsed .brand-text,
+        .app-sidebar.collapsed .sidebar-search,
+        .app-sidebar.collapsed .nav-section-label,
+        .app-sidebar.collapsed .nav-item span,
+        .app-sidebar.collapsed .nav-badge,
+        .app-sidebar.collapsed .sidebar-theme-label,
+        .app-sidebar.collapsed .sidebar-theme-toggle {
+            display: none !important;
+        }
+        .app-sidebar.collapsed .sidebar-brand-row {
+            justify-content: center;
+            padding: 0;
+            width: 100%;
+        }
+        .app-sidebar.collapsed .brand-group {
+            gap: 0;
+            justify-content: center;
+        }
+        .app-sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 10px 0;
+        }
+        .app-sidebar.collapsed .nav-item-left {
+            gap: 0;
+            justify-content: center;
+        }
+        .app-sidebar.collapsed .user-profile-card {
+            padding: 6px 0;
+            justify-content: center;
+            background: transparent;
+            box-shadow: none;
+        }
+        .app-sidebar.collapsed .sidebar-bottom {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        /* Brand Row with Collapse Toggle */
+        .sidebar-brand-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            padding: 0 4px;
         }
-
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .sheet-icon {
-            background: #10b981;
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .brand-icon {
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
             color: #fff;
-            width: 28px;
-            height: 32px;
-            border-radius: 4px;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 18px rgba(236, 72, 153, 0.4);
+            font-weight: 800;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
         }
-        .title-group h1 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .badge-live {
-            background: #dcfce7;
-            color: #15803d;
+        .brand-icon:hover {
+            transform: scale(1.05);
+        }
+        .brand-text h2 {
+            font-size: 15.5px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+        .brand-text span {
             font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 999px;
+            color: var(--text-muted);
             font-weight: 600;
         }
-        .title-meta { font-size: 12px; color: var(--text-secondary); }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
 
-        .btn-ui {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
+        /* Inline Theme Switcher in User Card */
+        .sidebar-theme-toggle {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 3px;
+            border-radius: 999px;
             cursor: pointer;
+            gap: 4px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+            flex-shrink: 0;
+        }
+        body.theme-light .sidebar-theme-toggle {
+            background: rgba(15, 23, 42, 0.07);
+        }
+        .theme-toggle-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .theme-toggle-dot svg {
+            display: block;
+        }
+        /* Light mode active dot */
+        body.theme-light .theme-toggle-dot#dotLight.active {
+            background: #ffffff;
+            color: #f59e0b;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        /* Dark mode active dot */
+        body.theme-dark .theme-toggle-dot#dotDark.active {
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+        }
+        .sidebar-theme-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+        .app-sidebar.collapsed .sidebar-theme-text {
+            display: none !important;
+        }
+
+        /* Sidebar Search */
+        .sidebar-search {
+            position: relative;
+            width: 100%;
+        }
+        .sidebar-search input {
+            width: 100%;
+            padding: 9px 12px 9px 36px;
+            background: var(--control-bg);
+            border: none;
+            border-radius: 10px;
+            font-size: 12.5px;
+            outline: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .sidebar-search input:focus {
+            background: var(--control-active);
+            box-shadow: 0 0 0 2px var(--accent-pink);
+        }
+        .sidebar-search svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            stroke: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Sidebar Navigation Category Tabs (Handler Repair vs Spare Parts) */
+        .sidebar-tabs-row {
+            display: flex;
+            align-items: center;
+            background: var(--control-bg);
+            padding: 3px;
+            border-radius: 11px;
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+        .sidebar-tab-btn {
+            flex: 1;
+            padding: 7px 8px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sidebar-tab-btn:hover {
+            color: var(--text-main);
+        }
+        .sidebar-tab-btn.active {
+            background: var(--control-active);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        body.theme-light .sidebar-tab-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+        }
+        body.theme-dark .sidebar-tab-btn.active {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+        }
+        .app-sidebar.collapsed .sidebar-tabs-row {
+            display: none !important;
+        }
+
+        /* Blank State for Spare Parts Tab */
+        .blank-tab-view {
+            display: none;
+            flex: 1;
+            margin: 16px 26px 14px 26px;
+            border-radius: 18px;
+            background: var(--glass-card);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: var(--glass-shadow);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 14px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .blank-tab-view svg {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+        .blank-tab-view h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .blank-tab-view p {
+            font-size: 13px;
+            color: var(--text-muted);
+            max-width: 320px;
+        }
+
+        /* Navigation List */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .nav-section-label {
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            padding: 10px 10px 4px 10px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 12px;
+            border-radius: 11px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            user-select: none;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--control-bg);
+            color: var(--text-muted);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-item:hover {
+            background: var(--sidebar-nav-hover);
+            color: var(--text-main);
+        }
+        .nav-item:hover .nav-icon {
+            background: var(--control-active);
+            color: var(--text-main);
+        }
+        .nav-item.active {
+            background: var(--sidebar-active-bg);
+            color: var(--sidebar-active-text);
+        }
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 3.5px;
+            border-radius: 0 4px 4px 0;
+            background: var(--accent-pink);
+        }
+
+        .nav-badge {
+            font-size: 11.5px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            line-height: 1;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.15s;
+            justify-content: center;
         }
-        .btn-ui:hover { background: #f8fafc; border-color: #cbd5e1; }
-        .btn-primary { background: #10b981; color: #ffffff; border-color: #059669; }
-        .btn-primary:hover { background: #059669; }
-        .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
-        .btn-danger:hover { background: #fecaca; }
+        /* Dark Theme Badges */
+        body.theme-dark .nav-badge-pill { background: rgba(236, 72, 153, 0.22); color: #f472b6; }
+        body.theme-dark .nav-badge-num { background: var(--control-bg); color: #cbd5e1; }
+        body.theme-dark .nav-badge-active { background: rgba(239, 68, 68, 0.22); color: #fca5a5; }
+        body.theme-dark .nav-badge-pending { background: rgba(245, 158, 11, 0.22); color: #fde047; }
+        body.theme-dark .nav-badge-resolved { background: rgba(16, 185, 129, 0.22); color: #6ee7b7; }
 
-        .auth-badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
+        /* Light Theme Badges (High Contrast & Crisp Readability) */
+        body.theme-light .nav-badge-pill { background: #fce7f3; color: #db2777; font-weight: 800; }
+        body.theme-light .nav-badge-num { background: rgba(15, 23, 42, 0.08); color: #334155; font-weight: 800; }
+        body.theme-light .nav-badge-active { background: #fee2e2; color: #dc2626; font-weight: 800; }
+        body.theme-light .nav-badge-pending { background: #fef3c7; color: #d97706; font-weight: 800; }
+        body.theme-light .nav-badge-resolved { background: #d1fae5; color: #059669; font-weight: 800; }
+
+        /* ---------------------------------------------------- */
+        /* SIDEBAR BOTTOM USER / AUTH CARD (Matching Mockup)    */
+        /* ---------------------------------------------------- */
+        .sidebar-bottom {
+            padding-top: 10px;
         }
-        .auth-badge.logged-in { background: #dbeafe; color: #1e40af; }
-        .auth-badge.logged-out { background: #f1f5f9; color: #64748b; }
+        .user-profile-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        body.theme-light .user-profile-card {
+            background: rgba(15, 23, 42, 0.04);
+        }
+        .user-profile-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+        body.theme-light .user-profile-card:hover {
+            background: rgba(15, 23, 42, 0.07);
+        }
+        .user-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #475569;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .avatar-guest {
+            background: #64748b;
+        }
+        .user-status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 2px solid var(--bg-canvas);
+        }
+        .user-status-dot.offline {
+            background: #94a3b8;
+        }
 
-        .sub-bar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 8px 20px;
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+        }
+        .user-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+        .user-role {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+
+        /* Sidebar Auth Button */
+        .sidebar-auth-action {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
+        }
+        body.theme-light .sidebar-auth-action {
+            background: rgba(15, 23, 42, 0.06);
+        }
+        .sidebar-auth-action:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.04);
+        }
+        body.theme-light .sidebar-auth-action:hover {
+            background: rgba(15, 23, 42, 0.12);
+        }
+        .btn-logout {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.15);
+        }
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fff;
+        }
+        .btn-login {
+            color: var(--text-main);
+        }
+
+        /* ---------------------------------------------------- */
+        /* MAIN CONTENT AREA                                    */
+        /* ---------------------------------------------------- */
+        .app-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            min-width: 0;
+        }
+
+        /* Header - BORDERLESS (Seamless merge) */
+        .app-header {
+            position: relative;
+            z-index: 20;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: none;
+            padding: 14px 26px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
+            box-shadow: none; /* Merged seamlessly without borders or separation shadows */
         }
 
-        .search-box { position: relative; max-width: 380px; width: 100%; }
-        .search-box input {
-            width: 100%;
-            padding: 6px 10px 6px 30px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 12px;
-            outline: none;
-            background: #fafafa;
-        }
-        .search-box input:focus { border-color: #10b981; background: #fff; }
-        .search-box svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); stroke: var(--text-muted); }
-
-        .density-selector {
+        .header-left {
             display: flex;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-            background: #fafafa;
-        }
-        .density-btn {
-            border: none;
-            background: none;
-            padding: 5px 10px;
-            font-size: 11px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .density-btn.active {
-            background: #fff;
-            color: var(--text-main);
-            font-weight: 600;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
-        .table-wrap {
-            flex: 1;
-            overflow: auto;
-            position: relative;
-            background: #fff;
+        .sidebar-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--control-bg);
+            color: var(--text-muted);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
         }
+        .sidebar-toggle-btn:hover {
+            background: var(--control-active);
+            color: var(--text-main);
+            transform: scale(1.05);
+        }
+
+        .header-search { 
+            position: relative; 
+            display: flex;
+            align-items: center;
+            width: 320px;
+            max-width: 380px; 
+        }
+        .header-search input {
+            width: 100%;
+            padding: 9px 14px 9px 38px;
+            background: var(--control-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            outline: none;
+            color: var(--text-main);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .header-search input:focus {
+            background: var(--control-active);
+            box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.4), 0 4px 14px rgba(0,0,0,0.1);
+        }
+        .header-search svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            stroke: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .btn-ui {
+            background: var(--control-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: none;
+            color: var(--text-main);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .btn-ui svg { flex-shrink: 0; }
+        .btn-ui:hover {
+            background: var(--control-active);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(236, 72, 153, 0.38);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ea580c 0%, #db2777 100%);
+            box-shadow: 0 6px 22px rgba(236, 72, 153, 0.52);
+        }
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.32);
+            color: #ffffff;
+        }
+
+        /* Density Pill Group */
+        .dock-pill-group {
+            display: flex;
+            align-items: center;
+            background: var(--control-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .dock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .dock-btn:hover {
+            color: var(--text-main);
+        }
+        .dock-btn.active {
+            background: var(--control-active);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        body.theme-light .dock-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+        }
+        body.theme-dark .dock-btn.active {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+        }
+
+        /* Table Canvas - BORDERLESS */
+        .table-wrap {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            margin: 16px 26px 14px 26px;
+            border-radius: 18px;
+            background: var(--glass-card);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: none;
+            box-shadow: var(--glass-shadow);
+            overflow-x: auto;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .table-wrap::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+        .table-wrap.is-dragging { cursor: grabbing !important; }
 
         table.sheet-table {
             width: max-content;
             min-width: 100%;
-            border-collapse: separate;
+            border-collapse: collapse;
             border-spacing: 0;
             font-size: var(--font-size);
+            color: var(--text-main);
+            border: none;
         }
 
         th, td {
-            padding: var(--cell-padding-y) var(--cell-padding-x);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            padding: var(--cell-py) var(--cell-px);
+            border: none;
             white-space: nowrap;
+            vertical-align: middle;
+            height: var(--row-height);
+        }
+
+        tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--row-stripe-bg);
+        }
+        tbody tr:hover td { 
+            background-color: var(--row-hover-bg); 
+        }
+        tbody tr.selected td { 
+            background-color: rgba(249, 115, 22, 0.16) !important; 
         }
 
         th {
-            background: #f8fafc;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 11px;
+            background: var(--glass-th);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 11.5px;
+            letter-spacing: 0.5px;
             position: sticky;
             top: 0;
             z-index: 5;
             user-select: none;
+            border: none;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
-        .th-content { display: flex; align-items: center; gap: 6px; }
-        .type-icon { color: #94a3b8; font-size: 10px; font-weight: 700; }
-
-        .col-check { width: 36px; text-align: center; }
-        .col-num { width: 44px; text-align: center; color: var(--text-muted); font-size: 11px; }
-
-        /* Hidden when in read-only mode */
-        body.is-readonly .col-check { display: none !important; }
-
-        tr:hover td { background-color: var(--row-hover); }
-        tr.selected td { background-color: var(--row-selected); }
-
-        .badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            display: inline-block;
+        .th-content { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            text-transform: uppercase;
         }
-        .status-Active { background: #fee2e2; color: #b91c1c; }
-        .status-Pending { background: #fef3c7; color: #b45309; }
-        .status-Resolved { background: #dcfce7; color: #15803d; }
-
-        .add-row-strip {
-            padding: 8px 16px;
-            color: #059669;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border);
+        .type-icon-svg { 
+            color: var(--text-muted); 
             display: flex;
             align-items: center;
-            gap: 6px;
-            background: #fff;
+            opacity: 0.8;
         }
-        .add-row-strip:hover { background: #f0fdf4; }
 
-        tr.summary-row td {
-            background: #f8fafc;
+        .col-check { width: 46px; text-align: center; }
+        .col-num { width: 50px; text-align: center; color: var(--text-muted); font-size: 11.5px; font-weight: 600; }
+        .col-actions { width: 150px; text-align: center; }
+
+        /* Modern Custom Checkbox Styling */
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 17px;
+            height: 17px;
+            border-radius: 5px;
+            background: var(--control-bg);
+            border: 1.5px solid rgba(255, 255, 255, 0.18);
+            outline: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        body.theme-light input[type="checkbox"] {
+            border: 1.5px solid rgba(15, 23, 42, 0.2);
+            background: rgba(15, 23, 42, 0.05);
+        }
+        input[type="checkbox"]:hover {
+            border-color: var(--accent-pink);
+            background: var(--control-active);
+            transform: scale(1.08);
+        }
+        input[type="checkbox"]:checked {
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+        }
+        input[type="checkbox"]:checked::after {
+            content: '';
+            width: 5px;
+            height: 9px;
+            border: solid #ffffff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -2px;
+            display: block;
+        }
+
+        body.is-readonly .col-check,
+        body.is-readonly .col-actions,
+        body.is-readonly .auth-only { 
+            display: none !important; 
+        }
+
+        .badge {
+            font-size: 11.5px;
+            padding: 4px 11px;
+            border-radius: 999px;
             font-weight: 600;
-            font-size: 11px;
-            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+        }
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        /* Dark Theme Status Badges */
+        body.theme-dark .status-Active { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: #fca5a5; 
+        }
+        body.theme-dark .status-Active::before { background: #ef4444; }
+
+        body.theme-dark .status-Pending { 
+            background: rgba(245, 158, 11, 0.2); 
+            color: #fde047; 
+        }
+        body.theme-dark .status-Pending::before { background: #f59e0b; }
+
+        body.theme-dark .status-Resolved { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: #6ee7b7; 
+        }
+        body.theme-dark .status-Resolved::before { background: #10b981; }
+
+        /* Light Theme Status Badges (High Contrast, Crisp & Bold) */
+        body.theme-light .status-Active { 
+            background: #fee2e2; 
+            color: #b91c1c; 
+            font-weight: 700;
+        }
+        body.theme-light .status-Active::before { background: #dc2626; }
+
+        body.theme-light .status-Pending { 
+            background: #fef3c7; 
+            color: #b45309; 
+            font-weight: 700;
+        }
+        body.theme-light .status-Pending::before { background: #d97706; }
+
+        body.theme-light .status-Resolved { 
+            background: #d1fae5; 
+            color: #047857; 
+            font-weight: 700;
+        }
+        body.theme-light .status-Resolved::before { background: #059669; }
+
+        .cell-img-thumb {
+            width: var(--thumb-size);
+            height: var(--thumb-size);
+            object-fit: cover;
+            border-radius: 9px;
+            border: none;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .cell-img-thumb:hover { 
+            transform: scale(1.22); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.45); 
         }
 
+        .row-btn {
+            background: var(--control-bg);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 7px;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 2px;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .row-btn-edit { color: #38bdf8; }
+        .row-btn-edit:hover { background: rgba(56, 189, 248, 0.22); }
+        .row-btn-delete { color: #f87171; }
+        .row-btn-delete:hover { background: rgba(248, 113, 113, 0.22); }
+
+        /* Footer & Bottom Dock - BORDERLESS */
         .app-footer {
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            padding: 6px 16px;
+            position: relative;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: none;
+            padding: 10px 26px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
-            color: var(--text-secondary);
+            font-size: 12px;
+            color: var(--text-muted);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
         }
 
+        .footer-controls-dock {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dock-pill-group {
+            display: flex;
+            background: var(--control-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: none;
+            border-radius: 9px;
+            overflow: hidden;
+            padding: 3px;
+        }
+
+        .dock-btn {
+            border: none;
+            background: none;
+            padding: 5px 11px;
+            font-size: 11.5px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 700;
+            border-radius: 7px;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .dock-btn.active {
+            background: var(--control-active);
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+
+        /* Modal Overlay - BORDERLESS */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.45);
+            background: rgba(10, 8, 7, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
         .modal-card {
-            background: #fff;
-            border-radius: 12px;
-            width: 340px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            background: var(--modal-bg);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: none;
+            border-radius: 18px;
+            width: 360px;
+            padding: 28px;
+            box-shadow: 0 30px 65px rgba(0, 0, 0, 0.65);
         }
         .modal-card input {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: var(--control-bg);
+            border: none;
+            color: var(--text-main);
+            border-radius: 10px;
+            font-size: 13.5px;
+            margin-bottom: 14px;
             outline: none;
+            transition: all 0.2s;
         }
-        .modal-card input:focus { border-color: #10b981; }
+        .modal-card input:focus { 
+            background: var(--control-active);
+            box-shadow: 0 0 0 2px var(--accent-pink); 
+        }
+
+        /* Slide-over Drawer - BORDERLESS */
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 8, 7, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .drawer-overlay.active { display: block; opacity: 1; }
+
+        .drawer-panel {
+            position: fixed;
+            top: 0;
+            right: -620px;
+            width: 580px;
+            max-width: 95vw;
+            height: 100vh;
+            background: var(--modal-bg);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: none;
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.65);
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .drawer-panel.active { right: 0; }
+
+        .drawer-header {
+            padding: 22px 26px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .drawer-header h2 { 
+            font-size: 16.5px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .drawer-close {
+            background: var(--control-bg);
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .drawer-close:hover { color: var(--text-main); background: var(--control-active); }
+
+        .drawer-body { flex: 1; overflow-y: auto; padding: 26px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.col-span-2 { grid-column: span 2; }
+        .form-group label { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+        .form-control {
+            padding: 10px 14px;
+            background: var(--control-bg);
+            border: none;
+            color: var(--text-main);
+            border-radius: 9px;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            background: var(--control-active);
+            box-shadow: 0 0 0 2px var(--accent-pink);
+        }
+
+        /* Custom Select Component */
+        .custom-select-wrap {
+            position: relative;
+            width: 100%;
+        }
+        .custom-select-trigger {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--control-bg);
+            border: none;
+            color: var(--text-main);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+        }
+        .custom-select-trigger:hover {
+            background: var(--control-active);
+        }
+        .custom-select-wrap.is-open .custom-select-trigger {
+            background: var(--control-active);
+            box-shadow: 0 0 0 2px var(--accent-pink);
+        }
+        .custom-select-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .custom-select-arrow {
+            color: var(--text-muted);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .custom-select-wrap.is-open .custom-select-arrow {
+            transform: rotate(180deg);
+            color: var(--accent-pink);
+        }
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--modal-bg);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border-radius: 12px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+            padding: 6px;
+            z-index: 2200;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+        }
+        .custom-select-wrap.is-open .custom-select-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .custom-select-option {
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .custom-select-option:hover {
+            background: var(--control-active);
+        }
+        .custom-select-option.is-selected {
+            background: rgba(236, 72, 153, 0.15);
+            color: #fff;
+            font-weight: 600;
+        }
+        .option-check {
+            opacity: 0;
+            color: var(--accent-pink);
+            transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+        .custom-select-option.is-selected .option-check {
+            opacity: 1;
+        }
+        .custom-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-Active .status-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6); }
+        .status-Pending .status-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
+        .status-Resolved .status-dot { background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
+
+        .photo-picker-wrap { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+        .photo-thumb-box {
+            width: 52px;
+            height: 52px;
+            border: none;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 20px;
+            overflow: hidden;
+            background: var(--control-bg);
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .photo-thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .drawer-footer {
+            padding: 18px 26px;
+            border: none;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: var(--glass-bg);
+            box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .lightbox-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 8, 7, 0.92);
+            backdrop-filter: blur(14px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+            padding: 20px;
+        }
+        .lightbox-modal img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 16px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+            border: none;
+        }
 
         #toast {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 10px 18px;
-            background: #1e293b;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 12px;
+            bottom: 32px;
+            right: 32px;
+            padding: 12px 22px;
+            background: var(--modal-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text-main);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
             display: none;
-            z-index: 1100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 3000;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.25);
+            border: none;
+        }
+        body.theme-dark #toast {
+            color: #ffffff;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+        }
+        body.theme-light #toast {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+        }
+
+        /* Spare Parts Inventory & Stock Management Styles */
+        .stock-qty-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        body.theme-dark .stock-qty-badge.in-stock { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        body.theme-dark .stock-qty-badge.low-stock { background: rgba(245, 158, 11, 0.2); color: #fde047; }
+        body.theme-dark .stock-qty-badge.out-of-stock { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+        body.theme-light .stock-qty-badge.in-stock { background: #d1fae5; color: #047857; font-weight: 800; }
+        body.theme-light .stock-qty-badge.low-stock { background: #fef3c7; color: #b45309; font-weight: 800; }
+        body.theme-light .stock-qty-badge.out-of-stock { background: #fee2e2; color: #b91c1c; font-weight: 800; }
+
+        .stock-handler-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--control-bg);
+            color: var(--text-main);
+            margin: 0 2px;
+        }
+        .stock-ctrl-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--control-bg);
+            padding: 2px 4px;
+            border-radius: 8px;
+        }
+        .btn-stock-adj {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-stock-adj:hover {
+            background: var(--control-active);
+            transform: scale(1.1);
+        }
+        .btn-stock-adj.btn-plus:hover {
+            background: #10b981;
+            color: #fff;
+        }
+        .btn-stock-adj.btn-minus:hover {
+            background: #ef4444;
+            color: #fff;
         }
     </style>
 </head>
-<body class="density-normal is-readonly">
+<body class="density-normal is-readonly theme-dark">
 
-    <!-- Navbar -->
-    <header class="app-header">
-        <div class="header-left">
-            <div class="sheet-icon">田</div>
-            <div class="title-group">
-                <h1>Excel Data Table <span class="badge-live">Live &amp; Auto-Saved</span></h1>
-                <div class="title-meta" id="headerSummary">Connecting to Excel...</div>
+    <div class="ambient-shape shape-1"></div>
+    <div class="ambient-shape shape-2"></div>
+    <div class="ambient-shape shape-3"></div>
+    <div class="ambient-shape shape-4"></div>
+
+    <!-- ==================================================== -->
+    <!-- LEFT SIDEBAR                                         -->
+    <!-- ==================================================== -->
+    <aside class="app-sidebar">
+        <div class="sidebar-top">
+            <!-- Brand -->
+            <div class="sidebar-brand-row">
+                <div class="brand-group" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Collapse / Expand)">
+                    <div class="brand-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18"/>
+                            <path d="M3 15h18"/>
+                            <path d="M9 3v18"/>
+                            <path d="M15 3v18"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2>Handler Monitoring</h2>
+                        <span>Intest 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Sidebar Search -->
+            <div class="sidebar-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="sidebarSearchInput" placeholder="Quick search..." oninput="syncSearch(this.value)">
+            </div>
+
+            <!-- Category Switcher Tabs: Handler Repair vs Spare Parts -->
+            <div class="sidebar-tabs-row">
+                <button type="button" class="sidebar-tab-btn active" id="tabBtnRepair" onclick="switchCategoryTab('repair')">Handler Repair</button>
+                <button type="button" class="sidebar-tab-btn" id="tabBtnSpareParts" onclick="switchCategoryTab('spareparts')">Spare Parts</button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav" id="sidebarNavRepair">
+                <div class="nav-section-label">Main Menu</div>
+                
+                <button type="button" class="nav-item active" id="navAll" onclick="setFilterStatus('')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                            </svg>
+                        </div>
+                        <span>All Records</span>
+                    </div>
+                    <span class="nav-badge nav-badge-pill" id="navCountTotal">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navActive" onclick="setFilterStatus('Active')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <span>Active Issues</span>
+                    </div>
+                    <span class="nav-badge nav-badge-active" id="navCountActive">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navPending" onclick="setFilterStatus('Pending')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <span>Pending Review</span>
+                    </div>
+                    <span class="nav-badge nav-badge-pending" id="navCountPending">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navResolved" onclick="setFilterStatus('Resolved')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <span>Resolved</span>
+                    </div>
+                    <span class="nav-badge nav-badge-resolved" id="navCountResolved">0</span>
+                </button>
+
+                <div class="nav-section-label auth-only" style="margin-top: 10px;">Quick Actions</div>
+
+                <button type="button" class="nav-item auth-only" onclick="exportCSV()">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </div>
+                        <span>Export CSV</span>
+                    </div>
+                </button>
+            </nav>
+
+            <!-- Navigation Links for Spare Parts Inventory -->
+            <nav class="sidebar-nav" id="sidebarNavSpareParts" style="display: none;">
+                <div class="nav-section-label">Inventory Filter</div>
+                
+                <button type="button" class="nav-item active" id="navSpareAll" onclick="setSpareFilter('')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </div>
+                        <span>All Inventory</span>
+                    </div>
+                    <span class="nav-badge nav-badge-pill" id="navCountSpareTotal">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navSpareMT99" onclick="setSpareFilter('MT99')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                        </div>
+                        <span>MT99 Spares</span>
+                    </div>
+                    <span class="nav-badge nav-badge-num" id="navCountSpareMT99">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navSpareMT93" onclick="setSpareFilter('MT93')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                        </div>
+                        <span>MT93 Spares</span>
+                    </div>
+                    <span class="nav-badge nav-badge-num" id="navCountSpareMT93">0</span>
+                </button>
+
+                <button type="button" class="nav-item" id="navSpareLow" onclick="setSpareFilter('low')">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <span>Low / Out of Stock</span>
+                    </div>
+                    <span class="nav-badge nav-badge-active" id="navCountSpareLow">0</span>
+                </button>
+
+                <div class="nav-section-label auth-only" style="margin-top: 10px;">Quick Actions</div>
+
+                <button type="button" class="nav-item auth-only" onclick="exportSpareCSV()">
+                    <div class="nav-item-left">
+                        <div class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </div>
+                        <span>Export Inventory</span>
+                    </div>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Bottom: Theme Toggle & Login/Logout Action -->
+        <div class="sidebar-bottom">
+            <div class="user-profile-card">
+                <!-- Direct Theme Switcher Pill (Light & Dark Icons) -->
+                <div class="sidebar-theme-toggle" onclick="toggleThemeMini()" title="Switch Light / Dark theme">
+                    <div class="theme-toggle-dot" id="dotLight" title="Light Mode">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    </div>
+                    <div class="theme-toggle-dot active" id="dotDark" title="Dark Mode">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    </div>
+                </div>
+
+                <!-- Live Dynamic Theme Mode Text -->
+                <span class="sidebar-theme-text" id="themeModeText">Dark Mode</span>
+
+                <!-- Login / Logout Action Button -->
+                <button type="button" id="authBtn" class="sidebar-auth-action btn-login" onclick="toggleAuthModal()" title="Login to Edit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                </button>
             </div>
         </div>
-        <div class="header-actions">
-            <span id="authStatusBadge" class="auth-badge logged-out">🔒 Viewer (Read Only)</span>
-            <button id="authBtn" class="btn-ui" onclick="toggleAuthModal()">Login to Edit</button>
+    </aside>
 
-            <!-- Bulk Delete Button (Only shows when logged in and rows are selected) -->
-            <button class="btn-ui btn-danger" id="bulkDeleteBtn" style="display:none;" onclick="deleteSelectedRows()">Delete Selected</button>
+    <!-- ==================================================== -->
+    <!-- MAIN CONTENT AREA                                    -->
+    <!-- ==================================================== -->
+    <main class="app-main-content">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Collapse / Expand)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                    </svg>
+                </button>
+                <div class="header-search">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search across all fields..." oninput="syncSearch(this.value)">
+                </div>
+            </div>
 
-            <button class="btn-ui" onclick="exportCSV()">⬇ Export CSV</button>
-            <button class="btn-ui" onclick="loadTableData()">↻ Refresh</button>
-            <button class="btn-ui btn-primary" onclick="addNewRow()">+ Add Row</button>
+            <div class="header-actions">
+                <!-- Density Toggle Pill Group -->
+                <div class="dock-pill-group">
+                    <button class="dock-btn" id="btnDensityCompact" onclick="setDensity('compact')">
+                        <!-- Compact Density: Inward collapse arrows / compressed grid -->
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 14h6v6"></path>
+                            <path d="M20 10h-6V4"></path>
+                            <path d="M14 10l7-7"></path>
+                            <path d="M3 21l7-7"></path>
+                        </svg>
+                        <span>Compact</span>
+                    </button>
+                    <button class="dock-btn active" id="btnDensityNormal" onclick="setDensity('normal')">
+                        <!-- Normal Density: Clean table layout / rows -->
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <path d="M3 9h18"></path>
+                            <path d="M3 15h18"></path>
+                        </svg>
+                        <span>Normal</span>
+                    </button>
+                </div>
+
+                <button class="btn-ui btn-danger auth-only" id="bulkDeleteBtn" style="display:none;" onclick="deleteSelectedRows()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Delete Selected</span>
+                </button>
+                <button class="btn-ui btn-primary auth-only" id="addRowBtn" onclick="openAddRowDrawer()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Row</span>
+                </button>
+                <button class="btn-ui btn-primary auth-only" id="addSpareBtn" style="display:none;" onclick="openAddSpareDrawer()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Spare Part</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Table Canvas (Handler Repair Tab View) -->
+        <div class="table-wrap" id="tableWrap">
+            <table class="sheet-table">
+                <thead>
+                    <tr>
+                        <th class="col-check"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                        <th class="col-num">#</th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span> WW</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> DATE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span> TESTER ID</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg></span> HANDLER ID</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span> DEVICE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span> PACKAGE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> Handler Major Part</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> PROBLEM</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><circle cx="11" cy="11" r="3"/></svg></span> ROOT CAUSE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> DETAILS</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> MATERIAL CODE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span> Stock Items</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg></span> PENDING ACTION</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></span> STATUS</div></th>
+                        <th class="col-actions"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> ACTIONS</div></th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    <tr><td colspan="17" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading live data...</td></tr>
+                </tbody>
+            </table>
         </div>
-    </header>
 
-    <!-- Toolbar -->
-    <div class="sub-bar">
-        <div class="search-box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" placeholder="Search across all fields..." oninput="renderTable()">
+        <!-- Table Canvas (Spare Parts Inventory Tab View) -->
+        <div class="table-wrap" id="sparePartsView" style="display: none;">
+            <table class="sheet-table">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> NAME</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> PRODUCT CODE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span> HANDLER TYPE</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span> STOCKS QUANTITY</div></th>
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> IMAGE</div></th>
+                        <th class="col-actions"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg></span> STOCK ADJUST</div></th>
+                        <th class="col-actions auth-only"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> ACTIONS</div></th>
+                    </tr>
+                </thead>
+                <tbody id="sparePartsTableBody">
+                    <tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading spare parts inventory...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Spare Part Add / Edit Drawer -->
+    <div class="drawer-overlay" id="spareDrawerOverlay" onclick="closeSpareDrawer()"></div>
+    <div class="drawer-panel" id="spareDrawer">
+        <div class="drawer-header">
+            <div>
+                <h3 class="drawer-title" id="spareDrawerTitle" style="font-size: 16.5px; font-weight: 800; color: var(--text-main);">Add Spare Part</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Register stock equipment or spare part into inventory.</p>
+            </div>
+            <button type="button" class="drawer-close" onclick="closeSpareDrawer()">&times;</button>
         </div>
 
-        <div class="density-selector">
-            <button class="density-btn" onclick="setDensity('compact', this)">Compact</button>
-            <button class="density-btn active" onclick="setDensity('normal', this)">Normal</button>
-            <button class="density-btn" onclick="setDensity('relaxed', this)">Relaxed</button>
+        <div class="drawer-body">
+            <form id="spareForm" onsubmit="handleSpareFormSubmit(event)">
+                <input type="hidden" id="spare-edit-id" value="">
+
+                <div class="form-grid">
+                    <div class="form-group col-span-2">
+                        <label>Part Name *</label>
+                        <input type="text" id="spare-form-name" class="form-control" placeholder="e.g. Test Socket Pin Block" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product Code *</label>
+                        <input type="text" id="spare-form-code" class="form-control" placeholder="e.g. SP-MT99-042" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Handler Compatibility *</label>
+                        <input type="text" id="spare-form-handler" class="form-control" placeholder="e.g. MT99, MT93" required>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Initial Stock Quantity *</label>
+                        <input type="number" id="spare-form-qty" class="form-control" placeholder="e.g. 15" min="0" required>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Product Image</label>
+                        <div class="photo-picker-wrap">
+                            <div class="photo-thumb-box" id="sparePhotoPreview">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <input type="file" id="spare-form-file" accept="image/*" style="display:none;" onchange="handleSparePhotoUpload(this)">
+                            <button type="button" class="btn-ui" onclick="document.getElementById('spare-form-file').click()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>Upload Image</span>
+                            </button>
+                            <span id="spareFileName" style="font-size:12px; color:var(--text-muted);">No image chosen</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drawer-footer" style="margin-top: 26px; margin-left: -26px; margin-right: -26px; margin-bottom: -26px;">
+                    <button type="button" class="btn-ui" onclick="closeSpareDrawer()">Cancel</button>
+                    <button type="submit" class="btn-ui btn-primary" id="btnSaveSpare">Save Spare Part</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Data Grid -->
-    <div class="table-wrap">
-        <table class="sheet-table">
-            <thead>
-                <tr>
-                    <th class="col-check"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                    <th class="col-num">#</th>
-                    <th><div class="th-content"><span class="type-icon">#</span> ID</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> WW</div></th>
-                    <th><div class="th-content"><span class="type-icon">📅</span> DATE</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> TESTER ID</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> HANDLER ID</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> Handler Major Part</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> PROBLEM</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> ROOT CAUSE</div></th>
-                    <th><div class="th-content"><span class="type-icon">🖼</span> DETAILS</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> MATERIAL CODE</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> Stock Items</div></th>
-                    <th><div class="th-content"><span class="type-icon">T</span> PENDING ACTION</div></th>
-                    <th><div class="th-content"><span class="type-icon">◉</span> STATUS</div></th>
-                </tr>
-            </thead>
-            <tbody id="dataTableBody">
-                <tr><td colspan="15" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading live data...</td></tr>
-            </tbody>
-            <tfoot>
-                <tr class="summary-row">
-                    <td class="col-check">Σ</td>
-                    <td class="col-num">SUM</td>
-                    <td colspan="13" id="summaryStats">0 rows displayed</td>
-                </tr>
-            </tfoot>
-        </table>
-        <div class="add-row-strip" onclick="addNewRow()">+ Click to Add Row</div>
-    </div>
+    <!-- Stock Adjust Modal (Withdraw / Add Stocks) -->
+    <div class="modal-overlay" id="stockAdjustModal">
+        <div class="modal-card" style="max-width: 380px;">
+            <h3 style="margin-bottom: 6px; font-size: 16px; font-weight: 800; color: var(--text-main);" id="stockModalTitle">Adjust Stock</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;" id="stockModalSubtitle">Withdraw or add units to inventory.</p>
+            <form onsubmit="handleStockAdjustSubmit(event)">
+                <input type="hidden" id="stockAdjustPartId" value="">
+                <input type="hidden" id="stockAdjustActionType" value="add">
 
-    <!-- Footer -->
-    <footer class="app-footer">
-        <div id="footerCount">Showing 0 of 0 items</div>
-        <div id="footerTip">Log in to add or delete records in Excel.</div>
-    </footer>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label>Quantity to <span id="stockActionLabel">Add</span></label>
+                    <input type="number" id="stockAdjustQtyInput" class="form-control" min="1" value="1" required style="font-size: 16px; font-weight: 700; text-align: center;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label>Reason / Note (Optional)</label>
+                    <input type="text" id="stockAdjustReason" class="form-control" placeholder="e.g. PM Maintenance MT99">
+                </div>
+
+                <div style="display:flex; justify-content: flex-end; gap:8px;">
+                    <button type="button" class="btn-ui" onclick="closeStockAdjustModal()">Cancel</button>
+                    <button type="submit" class="btn-ui btn-primary" id="stockSubmitBtn">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Login Modal -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
-            <h3 style="margin-bottom: 6px;">Login to Edit</h3>
-            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">Enter credentials to unlock editing and row deletions.</p>
+            <h3 style="margin-bottom: 6px; font-size: 16px; font-weight: 800; color: var(--text-main);">Login to Edit</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">Sign in with credentials to modify records.</p>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="loginUsername" placeholder="Username (Default: admin)" required>
                 <input type="password" id="loginPassword" placeholder="Password (Default: admin123)" required>
@@ -376,6 +1903,149 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Slide-over Drawer (Single Evidence Photo Picker) -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer-panel" id="drawerPanel">
+        <div class="drawer-header">
+            <h2 id="drawerTitle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add New Row / Record</span>
+            </h2>
+            <button class="drawer-close" onclick="closeDrawer()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <form id="drawerForm" onsubmit="submitDrawerRecord(event)">
+                <input type="hidden" id="form-edit-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>WW</label>
+                        <input type="text" id="form-ww" class="form-control" placeholder="Enter ww" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="form-date" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tester ID</label>
+                        <input type="text" id="form-tester" class="form-control" placeholder="Enter tester id">
+                    </div>
+                    <div class="form-group">
+                        <label>Handler ID</label>
+                        <input type="text" id="form-handler" class="form-control" placeholder="Enter handler id" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Device</label>
+                        <input type="text" id="form-device" class="form-control" placeholder="Enter device">
+                    </div>
+                    <div class="form-group">
+                        <label>Package</label>
+                        <input type="text" id="form-package" class="form-control" placeholder="Enter package">
+                    </div>
+
+                    <!-- Single Image Evidence Picker -->
+                    <div class="form-group col-span-2">
+                        <label>Details (Image as Evidence)</label>
+                        <div class="photo-picker-wrap">
+                            <div class="photo-thumb-box" id="detailsThumb">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <input type="file" id="form-details-file" accept="image/*" style="display:none;" onchange="handlePhotoPick(this)">
+                            <button type="button" class="btn-ui" onclick="document.getElementById('form-details-file').click()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>Upload / Select Photo</span>
+                            </button>
+                            <span id="detailsFileName" style="font-size:12px; color:var(--text-muted);">No photo chosen</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Handler Major Part</label>
+                        <input type="text" id="form-majorpart" class="form-control" placeholder="Enter handler major part">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Problem</label>
+                        <input type="text" id="form-problem" class="form-control" placeholder="Enter problem" required>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Root Cause</label>
+                        <input type="text" id="form-cause" class="form-control" placeholder="Enter root cause">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Material Code</label>
+                        <input type="text" id="form-material" class="form-control" placeholder="Enter material code">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Items</label>
+                        <div class="custom-select-wrap" id="wrap-form-stock">
+                            <input type="hidden" id="form-stock" value="Stock Items">
+                            <button type="button" class="custom-select-trigger" onclick="toggleCustomDropdown('wrap-form-stock')">
+                                <span class="custom-select-label" id="label-form-stock">Stock Items</span>
+                                <svg class="custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div class="custom-select-dropdown">
+                                <div class="custom-select-option is-selected" data-value="Stock Items" onclick="selectCustomOption('form-stock', 'Stock Items')">
+                                    <span>Stock Items</span>
+                                    <svg class="option-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                                <div class="custom-select-option" data-value="Non Stock Items" onclick="selectCustomOption('form-stock', 'Non Stock Items')">
+                                    <span>Non Stock Items</span>
+                                    <svg class="option-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pending Action</label>
+                        <input type="text" id="form-pending" class="form-control" placeholder="Enter pending action">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div class="custom-select-wrap" id="wrap-form-status">
+                            <input type="hidden" id="form-status" value="Active">
+                            <button type="button" class="custom-select-trigger" onclick="toggleCustomDropdown('wrap-form-status')">
+                                <span class="custom-select-label" id="label-form-status">
+                                    <span class="custom-status-badge status-Active"><span class="status-dot"></span> Active</span>
+                                </span>
+                                <svg class="custom-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div class="custom-select-dropdown">
+                                <div class="custom-select-option is-selected" data-value="Active" onclick="selectCustomOption('form-status', 'Active')">
+                                    <span class="custom-status-badge status-Active"><span class="status-dot"></span> Active</span>
+                                    <svg class="option-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                                <div class="custom-select-option" data-value="Pending" onclick="selectCustomOption('form-status', 'Pending')">
+                                    <span class="custom-status-badge status-Pending"><span class="status-dot"></span> Pending</span>
+                                    <svg class="option-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                                <div class="custom-select-option" data-value="Resolved" onclick="selectCustomOption('form-status', 'Resolved')">
+                                    <span class="custom-status-badge status-Resolved"><span class="status-dot"></span> Resolved</span>
+                                    <svg class="option-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drawer-footer" style="margin-top: 26px; margin-left: -26px; margin-right: -26px; margin-bottom: -26px;">
+                    <button type="button" class="btn-ui" onclick="closeDrawer()">Cancel</button>
+                    <button type="submit" class="btn-ui btn-primary" id="btnSaveRecord">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox-modal" id="lightboxModal" onclick="this.style.display='none'">
+        <img id="lightboxImg" src="" alt="Preview">
     </div>
 
     <div id="toast"></div>
@@ -392,44 +2062,261 @@
         let rawData = [];
         let selectedRows = new Set();
         let isLoggedIn = sessionStorage.getItem('app_user_logged_in') === 'true';
+        let uploadedPhotoBase64 = "";
+        let currentStatusFilter = "";
 
         const columns = [
-            { key: 'ID', label: 'ID' },
-            { key: 'WW', label: 'WW' },
-            { key: 'DATE', label: 'DATE' },
-            { key: 'TESTER ID', label: 'TESTER ID' },
-            { key: 'HANDLER ID', label: 'HANDLER ID' },
-            { key: 'Handler Major Part', label: 'Handler Major Part' },
-            { key: 'PROBLEM', label: 'PROBLEM' },
-            { key: 'ROOT CAUSE', label: 'ROOT CAUSE' },
-            { key: 'DETAILS', label: 'DETAILS' },
-            { key: 'MATERIAL CODE', label: 'MATERIAL CODE' },
-            { key: 'STOCK ITEMS', label: 'Stock Items' },
-            { key: 'PENDING ACTION', label: 'PENDING ACTION' },
-            { key: 'STATUS', label: 'STATUS' }
+            { key: 'WW', label: 'WW', type: 'text' },
+            { key: 'DATE', label: 'DATE', type: 'text' },
+            { key: 'TESTER ID', label: 'TESTER ID', type: 'text' },
+            { key: 'HANDLER ID', label: 'HANDLER ID', type: 'text' },
+            { key: 'DEVICE', label: 'DEVICE', type: 'text' },
+            { key: 'PACKAGE', label: 'PACKAGE', type: 'text' },
+            { key: 'Handler Major Part', label: 'Handler Major Part', type: 'text' },
+            { key: 'PROBLEM', label: 'PROBLEM', type: 'text' },
+            { key: 'ROOT CAUSE', label: 'ROOT CAUSE', type: 'text' },
+            { key: 'DETAILS', label: 'DETAILS', type: 'image' },
+            { key: 'MATERIAL CODE', label: 'MATERIAL CODE', type: 'text' },
+            { key: 'STOCK ITEMS', label: 'Stock Items', type: 'text' },
+            { key: 'PENDING ACTION', label: 'PENDING ACTION', type: 'text' },
+            { key: 'STATUS', label: 'STATUS', type: 'badge' }
         ];
 
+        let currentActiveCategoryTab = 'repair';
+
+        /* ---------------------------------------------------- */
+        /* CATEGORY TABS (HANDLER REPAIR vs SPARE PARTS)        */
+        /* ---------------------------------------------------- */
+        function switchCategoryTab(tab) {
+            currentActiveCategoryTab = tab;
+            const btnRepair = document.getElementById('tabBtnRepair');
+            const btnSpare = document.getElementById('tabBtnSpareParts');
+            const tableWrap = document.getElementById('tableWrap');
+            const sparePartsView = document.getElementById('sparePartsView');
+            const navRepair = document.getElementById('sidebarNavRepair');
+            const navSpare = document.getElementById('sidebarNavSpareParts');
+            const addRowBtn = document.getElementById('addRowBtn');
+            const addSpareBtn = document.getElementById('addSpareBtn');
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            const searchInput = document.getElementById('searchInput');
+            const sidebarSearchInput = document.getElementById('sidebarSearchInput');
+
+            if (btnRepair) btnRepair.classList.toggle('active', tab === 'repair');
+            if (btnSpare) btnSpare.classList.toggle('active', tab === 'spareparts');
+
+            if (tab === 'repair') {
+                if (tableWrap) tableWrap.style.display = 'block';
+                if (sparePartsView) sparePartsView.style.display = 'none';
+                if (navRepair) navRepair.style.display = 'flex';
+                if (navSpare) navSpare.style.display = 'none';
+                if (addRowBtn) addRowBtn.style.display = isLoggedIn ? 'inline-flex' : 'none';
+                if (addSpareBtn) addSpareBtn.style.display = 'none';
+                if (searchInput) searchInput.placeholder = 'Search repair records...';
+                if (sidebarSearchInput) sidebarSearchInput.placeholder = 'Search repair records...';
+                renderTable();
+            } else {
+                if (tableWrap) tableWrap.style.display = 'none';
+                if (sparePartsView) sparePartsView.style.display = 'block';
+                if (navRepair) navRepair.style.display = 'none';
+                if (navSpare) navSpare.style.display = 'flex';
+                if (addRowBtn) addRowBtn.style.display = 'none';
+                if (bulkDeleteBtn) bulkDeleteBtn.style.display = 'none';
+                if (addSpareBtn) addSpareBtn.style.display = isLoggedIn ? 'inline-flex' : 'none';
+                if (searchInput) searchInput.placeholder = 'Search spare parts & equipment...';
+                if (sidebarSearchInput) sidebarSearchInput.placeholder = 'Search spare parts & equipment...';
+                renderSparePartsTable();
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* SIDEBAR COLLAPSE / EXPAND TOGGLE                     */
+        /* ---------------------------------------------------- */
+        function toggleSidebarCollapse() {
+            const sidebar = document.querySelector('.app-sidebar');
+            if (sidebar) {
+                const isCollapsed = sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebar_collapsed_pref', isCollapsed ? 'true' : 'false');
+            }
+        }
+
+        // Restore sidebar state
+        if (localStorage.getItem('sidebar_collapsed_pref') === 'true') {
+            const sidebar = document.querySelector('.app-sidebar');
+            if (sidebar) sidebar.classList.add('collapsed');
+        }
+        function setTheme(theme) {
+            document.body.classList.remove('theme-dark', 'theme-light');
+            document.body.classList.add(`theme-${theme}`);
+            localStorage.setItem('user_theme_pref', theme);
+
+            const btnDark = document.getElementById('btnThemeDark');
+            const btnLight = document.getElementById('btnThemeLight');
+            if (btnDark) btnDark.classList.toggle('active', theme === 'dark');
+            if (btnLight) btnLight.classList.toggle('active', theme === 'light');
+
+            const dotDark = document.getElementById('dotDark');
+            const dotLight = document.getElementById('dotLight');
+            if (dotDark) dotDark.classList.toggle('active', theme === 'dark');
+            if (dotLight) dotLight.classList.toggle('active', theme === 'light');
+
+            const modeText = document.getElementById('themeModeText');
+            if (modeText) {
+                modeText.innerText = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            }
+        }
+
+        function toggleThemeMini() {
+            const isDark = document.body.classList.contains('theme-dark');
+            setTheme(isDark ? 'light' : 'dark');
+        }
+
+        function setDensity(mode) {
+            document.body.classList.remove('density-compact', 'density-normal');
+            document.body.classList.add(`density-${mode}`);
+            localStorage.setItem('user_density_pref', mode);
+
+            const btnComp = document.getElementById('btnDensityCompact');
+            const btnNorm = document.getElementById('btnDensityNormal');
+            if (btnComp) btnComp.classList.toggle('active', mode === 'compact');
+            if (btnNorm) btnNorm.classList.toggle('active', mode === 'normal');
+        }
+
+        const savedTheme = localStorage.getItem('user_theme_pref') || 'dark';
+        const savedDensity = localStorage.getItem('user_density_pref') || 'normal';
+        setTheme(savedTheme);
+        setDensity(savedDensity);
+
+        /* ---------------------------------------------------- */
+        /* SIDEBAR STATUS FILTER                                */
+        /* ---------------------------------------------------- */
+        function setFilterStatus(status) {
+            currentStatusFilter = status;
+
+            document.getElementById('navAll').classList.toggle('active', status === '');
+            document.getElementById('navActive').classList.toggle('active', status === 'Active');
+            document.getElementById('navPending').classList.toggle('active', status === 'Pending');
+            document.getElementById('navResolved').classList.toggle('active', status === 'Resolved');
+
+            renderTable();
+        }
+
+        function syncSearch(val) {
+            const mainInput = document.getElementById('searchInput');
+            const sideInput = document.getElementById('sidebarSearchInput');
+            if (mainInput && mainInput.value !== val) mainInput.value = val;
+            if (sideInput && sideInput.value !== val) sideInput.value = val;
+            
+            if (currentActiveCategoryTab === 'spareparts') {
+                renderSparePartsTable();
+            } else {
+                renderTable();
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* PAN-TO-SCROLL (DRAG TO SCROLL RIGHT / LEFT)          */
+        /* ---------------------------------------------------- */
+        const slider = document.getElementById('tableWrap');
+        let isDown = false;
+        let startX = 0;
+        let startY = 0;
+        let scrollLeft = 0;
+        let scrollTop = 0;
+        let hasDragged = false;
+
+        slider.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button, input, select, a, textarea')) return;
+            isDown = true;
+            hasDragged = false;
+            slider.classList.add('is-dragging');
+            startX = e.pageX - slider.offsetLeft;
+            startY = e.pageY - slider.offsetTop;
+            scrollLeft = slider.scrollLeft;
+            scrollTop = slider.scrollTop;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDown) {
+                isDown = false;
+                slider.classList.remove('is-dragging');
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const y = e.pageY - slider.offsetTop;
+            const walkX = (x - startX) * 1.5;
+            const walkY = (y - startY) * 1.5;
+            if (Math.abs(walkX) > 4 || Math.abs(walkY) > 4) {
+                hasDragged = true;
+            }
+            slider.scrollLeft = scrollLeft - walkX;
+            slider.scrollTop = scrollTop - walkY;
+        });
+
         function checkAuthUI() {
-            const badge = document.getElementById('authStatusBadge');
             const authBtn = document.getElementById('authBtn');
-            const footerTip = document.getElementById('footerTip');
+            const avatar = document.getElementById('sidebarUserAvatar');
+            const nameEl = document.getElementById('sidebarUserName');
+            const roleEl = document.getElementById('sidebarUserRole');
+            const dotEl = document.getElementById('sidebarStatusDot');
 
             if (isLoggedIn) {
                 document.body.classList.remove('is-readonly');
                 document.body.classList.add('is-admin');
-                badge.className = "auth-badge logged-in";
-                badge.innerHTML = "🔓 Admin (Full Access)";
-                authBtn.innerText = "Logout";
-                authBtn.className = "btn-ui btn-danger";
-                footerTip.innerText = "Tip: Select rows to delete • Click '+ Add Row' to append new entries.";
+                if (avatar) {
+                    avatar.innerText = "AD";
+                    avatar.classList.remove('avatar-guest');
+                }
+                if (nameEl) nameEl.innerText = "Admin User";
+                if (roleEl) roleEl.innerText = "Administrator";
+                if (dotEl) dotEl.classList.remove('offline');
+
+                if (authBtn) {
+                    authBtn.className = "sidebar-auth-action btn-logout";
+                    authBtn.title = "Logout";
+                    authBtn.innerHTML = `
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    `;
+                }
             } else {
                 document.body.classList.remove('is-admin');
                 document.body.classList.add('is-readonly');
-                badge.className = "auth-badge logged-out";
-                badge.innerHTML = "🔒 Viewer (Read Only)";
-                authBtn.innerText = "Login to Edit";
-                authBtn.className = "btn-ui";
-                footerTip.innerText = "🔒 Read-only mode. Log in to select, delete, or add records.";
+                if (avatar) {
+                    avatar.innerText = "G";
+                    avatar.classList.add('avatar-guest');
+                }
+                if (nameEl) nameEl.innerText = "Guest Viewer";
+                if (roleEl) roleEl.innerText = "View Only";
+                if (dotEl) dotEl.classList.add('offline');
+
+                if (authBtn) {
+                    authBtn.className = "sidebar-auth-action btn-login";
+                    authBtn.title = "Login to Edit";
+                    authBtn.innerHTML = `
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                    `;
+                }
+            }
+
+            const addRowBtn = document.getElementById('addRowBtn');
+            const addSpareBtn = document.getElementById('addSpareBtn');
+            if (currentActiveCategoryTab === 'repair') {
+                if (addRowBtn) addRowBtn.style.display = isLoggedIn ? 'inline-flex' : 'none';
+                if (addSpareBtn) addSpareBtn.style.display = 'none';
+            } else {
+                if (addRowBtn) addRowBtn.style.display = 'none';
+                if (addSpareBtn) addSpareBtn.style.display = isLoggedIn ? 'inline-flex' : 'none';
             }
         }
 
@@ -440,6 +2327,7 @@
                 selectedRows.clear();
                 checkAuthUI();
                 renderTable();
+                renderSparePartsTable();
                 showToast("Logged out");
             } else {
                 const modal = document.getElementById('loginModal');
@@ -456,6 +2344,7 @@
                 document.getElementById('loginModal').style.display = 'none';
                 checkAuthUI();
                 renderTable();
+                renderSparePartsTable();
                 showToast("Logged in successfully!");
             } else {
                 alert("Invalid username or password");
@@ -464,7 +2353,7 @@
 
         async function loadTableData() {
             try {
-                showToast("Fetching records from Excel...");
+                showToast("Fetching records from database...");
                 const response = await fetch(readUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -473,15 +2362,14 @@
 
                 const textData = await response.text();
                 let data = JSON.parse(textData);
-
                 let list = Array.isArray(data) ? data : (data.value || (data.body && data.body.value) || []);
                 
-                // Exclude empty Excel placeholder rows
                 rawData = list.filter(r => {
                     const str = Object.values(r).join('').trim();
                     return str.length > 0 && str !== 'null';
                 });
 
+                updateSidebarCounts();
                 renderTable();
                 showToast(`Loaded ${rawData.length} active rows`);
             } catch (err) {
@@ -490,10 +2378,32 @@
             }
         }
 
-        // Resolves the unique ID of the row
+        function updateSidebarCounts() {
+            const total = rawData.length;
+            const active = rawData.filter(r => getVal(r, 'STATUS') === 'Active').length;
+            const pending = rawData.filter(r => getVal(r, 'STATUS') === 'Pending').length;
+            const resolved = rawData.filter(r => getVal(r, 'STATUS') === 'Resolved').length;
+
+            const elTotal = document.getElementById('navCountTotal');
+            if (elTotal) elTotal.innerText = total;
+            const elActive = document.getElementById('navCountActive');
+            if (elActive) elActive.innerText = active;
+            const elPending = document.getElementById('navCountPending');
+            if (elPending) elPending.innerText = pending;
+            const elResolved = document.getElementById('navCountResolved');
+            if (elResolved) elResolved.innerText = resolved;
+        }
+
         function getRowId(row) {
             if (!row) return '';
-            return row['ID'] || row['id'] || row['Id'] || '';
+            if (row['ID'] !== undefined && row['ID'] !== null && String(row['ID']).trim() !== '') return String(row['ID']).trim();
+            if (row['id'] !== undefined && row['id'] !== null && String(row['id']).trim() !== '') return String(row['id']).trim();
+            for (let k of Object.keys(row)) {
+                if (k.toLowerCase().replace(/[^a-z0-9]/g, '') === 'id' && row[k]) return String(row[k]).trim();
+            }
+            if (row['__PowerAppsId__']) return String(row['__PowerAppsId__']);
+            if (row['itemInternalId']) return String(row['itemInternalId']);
+            return '';
         }
 
         function getVal(row, key) {
@@ -501,24 +2411,27 @@
             if (row[key] !== undefined && row[key] !== null) return String(row[key]).trim();
 
             const aliases = {
-                'ID': ['ID', 'id', 'Id'],
                 'WW': ['WW', 'ww'],
                 'DATE': ['DATE', 'Date'],
-                'TESTER ID': ['TESTER ID', 'TESTER_ID', 'TESTER_x0020_ID'],
-                'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID', 'EventName'],
+                'TESTER ID': ['TESTER ID', 'TESTER_ID', 'TESTER_x0020_ID', 'Tester ID'],
+                'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID', 'Handler ID', 'EventName'],
+                'DEVICE': ['DEVICE', 'Device', 'device'],
+                'PACKAGE': ['PACKAGE', 'Package', 'package'],
                 'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'Handler_x0020_Major_x0020_Part', 'MajorPart'],
-                'PROBLEM': ['PROBLEM', 'Problem'],
-                'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'ROOT_x0020_CAUSE'],
-                'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS'],
+                'PROBLEM': ['PROBLEM', 'Problem', 'problem'],
+                'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'ROOT_x0020_CAUSE', 'Root Cause'],
+                'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS', 'Details'],
                 'MATERIAL CODE': ['MATERIAL CODE', 'Material Code', 'MATERIAL_CODE'],
                 'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'StockItems'],
                 'PENDING ACTION': ['PENDING ACTION', 'Pending Action', 'PENDING_ACTION'],
-                'STATUS': ['STATUS', 'Status']
+                'STATUS': ['STATUS', 'Status', 'status']
             };
 
             const checks = aliases[key] || [key];
             for (const k of checks) {
-                if (row[k] !== undefined && row[k] !== null) return String(row[k]).trim();
+                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+                    return String(row[k]).trim();
+                }
             }
 
             const cleanTarget = key.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -531,23 +2444,27 @@
             return '';
         }
 
-        function setDensity(mode, btn) {
-            document.body.className = `${document.body.className.replace(/density-\w+/g, '')} density-${mode}`.trim();
-            document.querySelectorAll('.density-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function isImageSource(str) {
+            if (!str || typeof str !== 'string') return false;
+            const trimmed = str.trim();
+            return trimmed.startsWith('data:image') ||
+                   trimmed.startsWith('blob:') ||
+                   /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i.test(trimmed);
         }
 
         function renderTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
+            const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
             const tbody = document.getElementById('dataTableBody');
             tbody.innerHTML = '';
 
             const filtered = rawData.filter(row => {
-                return columns.some(col => String(getVal(row, col.key)).toLowerCase().includes(query));
+                const matchStatus = !currentStatusFilter || getVal(row, 'STATUS') === currentStatusFilter;
+                const matchQuery = !query || columns.some(col => String(getVal(row, col.key)).toLowerCase().includes(query));
+                return matchStatus && matchQuery;
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; padding:30px; color:#94a3b8;">No matching records found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding:30px; color:#94a3b8;">No matching records found</td></tr>`;
                 updateCounters(0);
                 return;
             }
@@ -563,13 +2480,30 @@
 
                 columns.forEach(col => {
                     const val = getVal(row, col.key);
-                    if (col.key === 'STATUS') {
+                    const isImg = isImageSource(val) || (col.type === 'image' && val.startsWith('http'));
+
+                    if (isImg || col.type === 'image') {
+                        html += `<td>${isImg ? `<img src="${val}" class="cell-img-thumb" onclick="previewImage('${val}')" alt="${col.label}">` : `<span style="color:var(--text-muted)">-</span>`}</td>`;
+                    } else if (col.type === 'badge') {
                         const st = val || 'Active';
                         html += `<td><span class="badge status-${st}">${st}</span></td>`;
                     } else {
                         html += `<td>${val !== '' ? val : '-'}</td>`;
                     }
                 });
+
+                html += `
+                    <td class="col-actions">
+                        <button class="row-btn row-btn-edit" title="Edit Record" onclick="openEditDrawer(${idx})">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <span>Edit</span>
+                        </button>
+                        <button class="row-btn row-btn-delete" title="Delete Record" onclick="deleteSingleRow(${idx})">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <span>Delete</span>
+                        </button>
+                    </td>
+                `;
 
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
@@ -578,51 +2512,283 @@
             updateCounters(filtered.length);
         }
 
-        async function addNewRow() {
+        function compressImage(file, maxWidth = 600, quality = 0.6) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                };
+            });
+        }
+
+        /* ---------------------------------------------------- */
+        /* CUSTOM DROPDOWN HELPERS                              */
+        /* ---------------------------------------------------- */
+        function toggleCustomDropdown(wrapId) {
+            const wrap = document.getElementById(wrapId);
+            if (!wrap) return;
+            const wasOpen = wrap.classList.contains('is-open');
+            document.querySelectorAll('.custom-select-wrap').forEach(w => w.classList.remove('is-open'));
+            if (!wasOpen) {
+                wrap.classList.add('is-open');
+            }
+        }
+
+        function selectCustomOption(fieldId, value) {
+            setCustomSelectValue(fieldId, value);
+            document.querySelectorAll('.custom-select-wrap').forEach(w => w.classList.remove('is-open'));
+        }
+
+        function setCustomSelectValue(fieldId, value) {
+            const input = document.getElementById(fieldId);
+            if (input) input.value = value;
+
+            const wrap = document.getElementById(`wrap-${fieldId}`);
+            if (!wrap) return;
+
+            const labelEl = document.getElementById(`label-${fieldId}`);
+            if (labelEl) {
+                if (fieldId === 'form-status') {
+                    labelEl.innerHTML = `<span class="custom-status-badge status-${value}"><span class="status-dot"></span> ${value}</span>`;
+                } else {
+                    labelEl.innerText = value;
+                }
+            }
+
+            wrap.querySelectorAll('.custom-select-option').forEach(opt => {
+                if (opt.getAttribute('data-value') === value) {
+                    opt.classList.add('is-selected');
+                } else {
+                    opt.classList.remove('is-selected');
+                }
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-wrap')) {
+                document.querySelectorAll('.custom-select-wrap').forEach(w => w.classList.remove('is-open'));
+            }
+        });
+
+        function openAddRowDrawer() {
             if (!isLoggedIn) {
-                showToast("🔒 Log in to add rows");
+                showToast("🔒 Log in to add records");
                 toggleAuthModal();
                 return;
             }
 
-            const uniqueId = Date.now().toString(); // Timestamp ID guaranteed to be unique
-            const hndId = "08M" + Math.floor(10000 + Math.random() * 90000);
-            
-            const newEntry = {
+            document.getElementById('drawerTitle').innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add New Row / Record</span>
+            `;
+            document.getElementById('btnSaveRecord').innerText = "Save Record";
+            document.getElementById('form-edit-id').value = "";
+
+            document.getElementById('form-ww').value = "WW" + new Date().getFullYear().toString().slice(-2) + "01";
+            document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('form-tester').value = "";
+            document.getElementById('form-handler').value = "";
+            document.getElementById('form-device').value = "";
+            document.getElementById('form-package').value = "";
+            document.getElementById('form-majorpart').value = "";
+            document.getElementById('form-problem').value = "";
+            document.getElementById('form-cause').value = "";
+            document.getElementById('form-material').value = "";
+            document.getElementById('form-pending').value = "";
+
+            setCustomSelectValue('form-stock', 'Stock Items');
+            setCustomSelectValue('form-status', 'Active');
+
+            uploadedPhotoBase64 = "";
+            document.getElementById('detailsThumb').innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            `;
+            document.getElementById('detailsFileName').innerText = "No photo chosen";
+
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('drawerPanel').classList.add('active');
+        }
+
+        function openEditDrawer(idx) {
+            if (!isLoggedIn) {
+                showToast("🔒 Log in to edit records");
+                toggleAuthModal();
+                return;
+            }
+
+            const row = rawData[idx];
+            const rId = getRowId(row);
+
+            document.getElementById('drawerTitle').innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>Edit Record</span>
+            `;
+            document.getElementById('btnSaveRecord').innerText = "Update Record";
+            document.getElementById('form-edit-id').value = rId;
+
+            document.getElementById('form-ww').value = getVal(row, 'WW');
+            document.getElementById('form-date').value = getVal(row, 'DATE') || new Date().toISOString().split('T')[0];
+            document.getElementById('form-tester').value = getVal(row, 'TESTER ID');
+            document.getElementById('form-handler').value = getVal(row, 'HANDLER ID');
+            document.getElementById('form-device').value = getVal(row, 'DEVICE');
+            document.getElementById('form-package').value = getVal(row, 'PACKAGE');
+            document.getElementById('form-majorpart').value = getVal(row, 'Handler Major Part');
+            document.getElementById('form-problem').value = getVal(row, 'PROBLEM');
+            document.getElementById('form-cause').value = getVal(row, 'ROOT CAUSE');
+            document.getElementById('form-material').value = getVal(row, 'MATERIAL CODE');
+            document.getElementById('form-pending').value = getVal(row, 'PENDING ACTION');
+
+            setCustomSelectValue('form-stock', getVal(row, 'STOCK ITEMS') || "Stock Items");
+            setCustomSelectValue('form-status', getVal(row, 'STATUS') || "Active");
+
+            const existingImg = getVal(row, 'DETAILS');
+            if (existingImg && (existingImg.startsWith('data:image') || existingImg.startsWith('http'))) {
+                uploadedPhotoBase64 = existingImg;
+                document.getElementById('detailsThumb').innerHTML = `<img src="${existingImg}" alt="Thumb">`;
+                document.getElementById('detailsFileName').innerText = "Existing photo kept";
+            } else {
+                uploadedPhotoBase64 = "";
+                document.getElementById('detailsThumb').innerHTML = `
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                `;
+                document.getElementById('detailsFileName').innerText = "No photo chosen";
+            }
+
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('drawerPanel').classList.add('active');
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('drawerPanel').classList.remove('active');
+        }
+
+        async function handlePhotoPick(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('detailsFileName').innerText = file.name + " (Compressing...)";
+                uploadedPhotoBase64 = await compressImage(file, 600, 0.6);
+                document.getElementById('detailsThumb').innerHTML = `<img src="${uploadedPhotoBase64}" alt="Thumb">`;
+                document.getElementById('detailsFileName').innerText = file.name + " (Ready)";
+            }
+        }
+
+        async function submitDrawerRecord(e) {
+            e.preventDefault();
+
+            const btnSave = document.getElementById('btnSaveRecord');
+            btnSave.innerText = "Saving to Excel...";
+            btnSave.disabled = true;
+
+            const editId = document.getElementById('form-edit-id').value;
+            const uniqueId = editId ? editId : ("REC-" + Date.now());
+
+            const recordPayload = {
                 "ID": uniqueId,
-                "WW": "WW2644",
-                "DATE": new Date().toISOString().split('T')[0],
-                "TESTER_ID": "130CTS",
-                "HANDLER_ID": hndId,
-                "MajorPart": "Guide Lever",
-                "PROBLEM": "Replaced worn part",
-                "ROOT_CAUSE": "Wear and tear",
-                "DETAILS": "",
-                "MATERIAL_CODE": "MC-01",
-                "StockItems": "Stock Items",
-                "PENDING_ACTION": "None",
-                "STATUS": "Active"
+                "WW": document.getElementById('form-ww').value.trim(),
+                "DATE": document.getElementById('form-date').value,
+                "TESTER_ID": document.getElementById('form-tester').value.trim(),
+                "HANDLER_ID": document.getElementById('form-handler').value.trim(),
+                "DEVICE": document.getElementById('form-device').value.trim(),
+                "PACKAGE": document.getElementById('form-package').value.trim(),
+                "MajorPart": document.getElementById('form-majorpart').value.trim(),
+                "PROBLEM": document.getElementById('form-problem').value.trim(),
+                "ROOT_CAUSE": document.getElementById('form-cause').value.trim(),
+                "DETAILS": uploadedPhotoBase64,
+                "MATERIAL_CODE": document.getElementById('form-material').value.trim(),
+                "StockItems": document.getElementById('form-stock').value,
+                "PENDING_ACTION": document.getElementById('form-pending').value.trim(),
+                "STATUS": document.getElementById('form-status').value
             };
 
-            showToast("Saving row to Excel Online...");
+            showToast("Syncing with Excel Online...");
 
             try {
                 const response = await fetch(writeUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newEntry)
+                    body: JSON.stringify(recordPayload)
                 });
 
                 if (response.ok) {
-                    showToast("Row saved! Refreshing...");
+                    showToast(editId ? "Record updated! Reloading..." : "Record added! Reloading...");
+                    closeDrawer();
                     setTimeout(loadTableData, 2000);
                 } else {
                     const err = await response.text();
-                    alert("Power Automate Error on Add:\n" + err);
+                    alert("Power Automate Error on Save:\n" + err);
                 }
             } catch (err) {
                 console.error(err);
-                alert("Network error calling Write Flow.");
+                alert("Network error: Could not reach Write Flow. Make sure Excel is not locked.");
+            } finally {
+                btnSave.innerText = editId ? "Update Record" : "Save Record";
+                btnSave.disabled = false;
+            }
+        }
+
+        async function deleteSingleRow(idx) {
+            if (!isLoggedIn) {
+                showToast("🔒 Log in to delete records");
+                toggleAuthModal();
+                return;
+            }
+
+            const row = rawData[idx];
+            const rId = getRowId(row);
+            const hndId = getVal(row, 'HANDLER ID');
+
+            if (!confirm(`Permanently delete row for Handler "${hndId || rId}" from Excel?`)) return;
+
+            if (!rId) {
+                alert("Could not find a valid ID for this row.");
+                return;
+            }
+
+            showToast(`Deleting row from Excel...`);
+
+            try {
+                const response = await fetch(deleteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "ROW_ID": String(rId) })
+                });
+
+                if (!response.ok) {
+                    const err = await response.text();
+                    alert(`Power Automate returned an error deleting ID ${rId}:\n${err}`);
+                    return;
+                }
+
+                showToast("Row deleted from Excel successfully!");
+
+                rawData.splice(idx, 1);
+                updateSidebarCounts();
+                renderTable();
+
+                setTimeout(async () => {
+                    await loadTableData();
+                }, 2500);
+
+            } catch (err) {
+                console.error(err);
+                alert("Network error: Could not reach Delete Flow.");
             }
         }
 
@@ -636,22 +2802,18 @@
             selectedRows.forEach(idx => {
                 const row = rawData[idx];
                 const rId = getRowId(row);
-                if (rId) {
-                    idsToDelete.push(rId);
-                }
+                if (rId) idsToDelete.push(rId);
             });
 
             if (idsToDelete.length === 0) {
-                alert("Could not find a valid ID for the selected row(s). Make sure your Excel table row has an 'ID' populated.");
+                alert("Could not find a valid ID for the selected row(s).");
                 return;
             }
 
-            showToast(`Deleting ${idsToDelete.length} row(s) from Excel...`);
+            showToast(`Deleting ${idsToDelete.length} row(s)...`);
 
             try {
                 for (let rId of idsToDelete) {
-                    console.log("Sending delete request for ID:", rId);
-
                     const response = await fetch(deleteUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -660,41 +2822,53 @@
 
                     if (!response.ok) {
                         const err = await response.text();
-                        console.error(`Delete failed:`, err);
                         alert(`Power Automate returned an error deleting ID ${rId}:\n${err}`);
                         return;
                     }
                 }
 
-                showToast("Deleted from Excel successfully! Updating...");
-
-                // Instant optimistic local removal from UI
+                showToast("Deleted successfully! Updating...");
                 rawData = rawData.filter((_, idx) => !selectedRows.has(idx));
                 selectedRows.clear();
+                updateSidebarCounts();
                 renderTable();
 
-                // Wait 2.5s for OneDrive to finish writing the file before re-reading
                 setTimeout(async () => {
                     await loadTableData();
                 }, 2500);
 
             } catch (err) {
                 console.error(err);
-                alert("Network error: Could not reach Power Automate Delete Flow.");
+                alert("Network error: Could not reach Delete Flow.");
             }
         }
 
+        function previewImage(url) {
+            if (hasDragged) return;
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            img.src = url;
+            modal.style.display = 'flex';
+        }
+
         function updateCounters(displayed) {
-            document.getElementById('headerSummary').innerText = `${rawData.length} records in Excel`;
-            document.getElementById('footerCount').innerText = `Showing ${displayed} of ${rawData.length} items`;
-            document.getElementById('summaryStats').innerText = `${displayed} rows displayed`;
+            const fc = document.getElementById('footerCount');
+            if (fc) fc.innerText = `Showing ${displayed} of ${rawData.length} items`;
 
             const bulkBtn = document.getElementById('bulkDeleteBtn');
-            if (isLoggedIn && selectedRows.size > 0) {
-                bulkBtn.style.display = 'inline-flex';
-                bulkBtn.innerText = `Delete Selected (${selectedRows.size})`;
-            } else {
-                bulkBtn.style.display = 'none';
+            if (bulkBtn) {
+                if (isLoggedIn && selectedRows.size > 0) {
+                    bulkBtn.style.display = 'inline-flex';
+                    bulkBtn.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>Delete Selected (${selectedRows.size})</span>
+                    `;
+                } else {
+                    bulkBtn.style.display = 'none';
+                }
             }
         }
 
@@ -733,7 +2907,370 @@
             setTimeout(() => { t.style.display = 'none'; }, 3000);
         }
 
+        /* ---------------------------------------------------- */
+        /* SPARE PARTS INVENTORY STATE & CONTROLLER             */
+        /* ---------------------------------------------------- */
+        const defaultSpareData = [
+            {
+                id: 'sp-1',
+                name: 'Test Socket Pin Block Assembly',
+                code: 'SP-MT99-042',
+                handler: 'MT99',
+                quantity: 18,
+                image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=100&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sp-2',
+                name: 'High-Precision Pick & Place Rubber Nozzle',
+                code: 'SP-MT93-108',
+                handler: 'MT93',
+                quantity: 5,
+                image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=100&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sp-3',
+                name: 'High Vacuum Suction Cup Set (Pack of 10)',
+                code: 'SP-MT-COM-011',
+                handler: 'MT99, MT93',
+                quantity: 42,
+                image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=100&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sp-4',
+                name: 'Optical Position Sensor Module',
+                code: 'SP-MT99-SEN-08',
+                handler: 'MT99',
+                quantity: 2,
+                image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sp-5',
+                name: 'Thermal Chuck Heater Cartridge 24V',
+                code: 'SP-MT93-TH-99',
+                handler: 'MT93',
+                quantity: 0,
+                image: 'https://images.unsplash.com/photo-1581092162384-8987c1d64718?w=100&auto=format&fit=crop&q=80'
+            }
+        ];
+
+        let spareData = [];
+        try {
+            const savedSpares = localStorage.getItem('spare_parts_inventory_data');
+            spareData = savedSpares ? JSON.parse(savedSpares) : defaultSpareData;
+        } catch (err) {
+            spareData = defaultSpareData;
+        }
+
+        let currentSpareFilter = '';
+        let uploadedSparePhotoBase64 = '';
+
+        function saveSpareData() {
+            try {
+                localStorage.setItem('spare_parts_inventory_data', JSON.stringify(spareData));
+            } catch (e) {
+                console.error('Error saving spare parts to storage:', e);
+            }
+            updateSpareCounts();
+        }
+
+        function updateSpareCounts() {
+            const total = spareData.length;
+            const mt99 = spareData.filter(s => (s.handler || '').toUpperCase().includes('MT99')).length;
+            const mt93 = spareData.filter(s => (s.handler || '').toUpperCase().includes('MT93')).length;
+            const low = spareData.filter(s => Number(s.quantity || 0) <= 5).length;
+
+            const totalEl = document.getElementById('navCountSpareTotal');
+            const mt99El = document.getElementById('navCountSpareMT99');
+            const mt93El = document.getElementById('navCountSpareMT93');
+            const lowEl = document.getElementById('navCountSpareLow');
+
+            if (totalEl) totalEl.innerText = total;
+            if (mt99El) mt99El.innerText = mt99;
+            if (mt93El) mt93El.innerText = mt93;
+            if (lowEl) lowEl.innerText = low;
+        }
+
+        function setSpareFilter(filter) {
+            currentSpareFilter = filter;
+            const navAll = document.getElementById('navSpareAll');
+            const navMT99 = document.getElementById('navSpareMT99');
+            const navMT93 = document.getElementById('navSpareMT93');
+            const navLow = document.getElementById('navSpareLow');
+
+            if (navAll) navAll.classList.toggle('active', filter === '');
+            if (navMT99) navMT99.classList.toggle('active', filter === 'MT99');
+            if (navMT93) navMT93.classList.toggle('active', filter === 'MT93');
+            if (navLow) navLow.classList.toggle('active', filter === 'low');
+
+            renderSparePartsTable();
+        }
+
+        function renderSparePartsTable() {
+            const tbody = document.getElementById('sparePartsTableBody');
+            if (!tbody) return;
+
+            const query = (document.getElementById('searchInput')?.value || document.getElementById('sidebarSearchInput')?.value || '').toLowerCase().trim();
+
+            let filtered = spareData.filter(part => {
+                if (currentSpareFilter === 'MT99' && !(part.handler || '').toUpperCase().includes('MT99')) return false;
+                if (currentSpareFilter === 'MT93' && !(part.handler || '').toUpperCase().includes('MT93')) return false;
+                if (currentSpareFilter === 'low' && Number(part.quantity || 0) > 5) return false;
+
+                if (query) {
+                    const str = `${part.name} ${part.code} ${part.handler} ${part.quantity}`.toLowerCase();
+                    if (!str.includes(query)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-muted);">No spare parts match the filter.</td></tr>`;
+                const fc = document.getElementById('footerCount');
+                if (fc) fc.innerText = `Showing 0 of ${spareData.length} spare parts`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((part, idx) => {
+                const qty = Number(part.quantity || 0);
+                let badgeClass = 'in-stock';
+                let badgeLabel = `${qty} in stock`;
+                if (qty === 0) {
+                    badgeClass = 'out-of-stock';
+                    badgeLabel = 'Out of Stock';
+                } else if (qty <= 5) {
+                    badgeClass = 'low-stock';
+                    badgeLabel = `${qty} (Low Stock)`;
+                }
+
+                const handlers = (part.handler || 'MT99').split(',').map(h => `<span class="stock-handler-tag">${h.trim()}</span>`).join('');
+                const imgHtml = part.image 
+                    ? `<img src="${part.image}" class="cell-img-thumb" onclick="previewImage('${part.image}')" title="Click to enlarge" alt="${part.name}">`
+                    : `<span style="font-size:12px; color:var(--text-muted);">&mdash;</span>`;
+
+                html += `
+                    <tr>
+                        <td class="col-num">${idx + 1}</td>
+                        <td style="font-weight: 700; color: var(--text-main);">${part.name}</td>
+                        <td><code style="font-size: 12px; background: var(--control-bg); padding: 3px 6px; border-radius: 6px;">${part.code}</code></td>
+                        <td>${handlers}</td>
+                        <td><span class="stock-qty-badge ${badgeClass}">${badgeLabel}</span></td>
+                        <td>${imgHtml}</td>
+                        <td class="col-actions">
+                            <div class="stock-ctrl-group">
+                                <button type="button" class="btn-stock-adj btn-minus" title="Withdraw Stocks (-)" onclick="openStockAdjustModal('${part.id}', 'withdraw')">&minus;</button>
+                                <span style="font-weight:800; font-size:13px; min-width:28px; text-align:center;">${qty}</span>
+                                <button type="button" class="btn-stock-adj btn-plus" title="Add / Replenish Stocks (+)" onclick="openStockAdjustModal('${part.id}', 'add')">&plus;</button>
+                            </div>
+                        </td>
+                        <td class="col-actions auth-only">
+                            <button type="button" class="row-btn row-btn-edit" onclick="openEditSpareDrawer('${part.id}')" title="Edit Part">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" class="row-btn row-btn-delete" onclick="deleteSparePart('${part.id}')" title="Delete Part">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <span>Delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            const fc = document.getElementById('footerCount');
+            if (fc) fc.innerText = `Showing ${filtered.length} of ${spareData.length} spare parts`;
+        }
+
+        /* ---------------------------------------------------- */
+        /* SPARE PARTS DRAWER & STOCK ACTIONS                   */
+        /* ---------------------------------------------------- */
+        function openAddSpareDrawer() {
+            if (!isLoggedIn) {
+                toggleAuthModal();
+                return;
+            }
+            document.getElementById('spareDrawerTitle').innerText = 'Add Spare Part';
+            document.getElementById('spare-edit-id').value = '';
+            document.getElementById('spare-form-name').value = '';
+            document.getElementById('spare-form-code').value = '';
+            document.getElementById('spare-form-handler').value = 'MT99, MT93';
+            document.getElementById('spare-form-qty').value = '10';
+            uploadedSparePhotoBase64 = '';
+            document.getElementById('spareFileName').innerText = 'No image chosen';
+            document.getElementById('sparePhotoPreview').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+            
+            document.getElementById('spareDrawerOverlay').classList.add('active');
+            document.getElementById('spareDrawer').classList.add('active');
+        }
+
+        function openEditSpareDrawer(id) {
+            if (!isLoggedIn) {
+                toggleAuthModal();
+                return;
+            }
+            const part = spareData.find(s => s.id === id);
+            if (!part) return;
+
+            document.getElementById('spareDrawerTitle').innerText = 'Edit Spare Part';
+            document.getElementById('spare-edit-id').value = part.id;
+            document.getElementById('spare-form-name').value = part.name || '';
+            document.getElementById('spare-form-code').value = part.code || '';
+            document.getElementById('spare-form-handler').value = part.handler || '';
+            document.getElementById('spare-form-qty').value = part.quantity || 0;
+            uploadedSparePhotoBase64 = part.image || '';
+
+            if (part.image) {
+                document.getElementById('spareFileName').innerText = 'Current Image Loaded';
+                document.getElementById('sparePhotoPreview').innerHTML = `<img src="${part.image}">`;
+            } else {
+                document.getElementById('spareFileName').innerText = 'No image chosen';
+                document.getElementById('sparePhotoPreview').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+            }
+
+            document.getElementById('spareDrawerOverlay').classList.add('active');
+            document.getElementById('spareDrawer').classList.add('active');
+        }
+
+        function closeSpareDrawer() {
+            document.getElementById('spareDrawerOverlay').classList.remove('active');
+            document.getElementById('spareDrawer').classList.remove('active');
+        }
+
+        function handleSparePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('spareFileName').innerText = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedSparePhotoBase64 = e.target.result;
+                    document.getElementById('sparePhotoPreview').innerHTML = `<img src="${uploadedSparePhotoBase64}">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleSpareFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('spare-edit-id').value;
+            const name = document.getElementById('spare-form-name').value.trim();
+            const code = document.getElementById('spare-form-code').value.trim();
+            const handler = document.getElementById('spare-form-handler').value.trim();
+            const quantity = parseInt(document.getElementById('spare-form-qty').value, 10) || 0;
+
+            if (editId) {
+                const idx = spareData.findIndex(s => s.id === editId);
+                if (idx !== -1) {
+                    spareData[idx].name = name;
+                    spareData[idx].code = code;
+                    spareData[idx].handler = handler;
+                    spareData[idx].quantity = quantity;
+                    if (uploadedSparePhotoBase64) spareData[idx].image = uploadedSparePhotoBase64;
+                    showToast(`Updated "${name}"`);
+                }
+            } else {
+                const newPart = {
+                    id: 'sp-' + Date.now(),
+                    name,
+                    code,
+                    handler,
+                    quantity,
+                    image: uploadedSparePhotoBase64
+                };
+                spareData.unshift(newPart);
+                showToast(`Added "${name}" to inventory`);
+            }
+
+            saveSpareData();
+            closeSpareDrawer();
+            renderSparePartsTable();
+        }
+
+        function deleteSparePart(id) {
+            if (!isLoggedIn) return;
+            const part = spareData.find(s => s.id === id);
+            if (!confirm(`Are you sure you want to delete "${part?.name || 'this part'}" from inventory?`)) return;
+
+            spareData = spareData.filter(s => s.id !== id);
+            saveSpareData();
+            renderSparePartsTable();
+            showToast("Spare part deleted");
+        }
+
+        /* ---------------------------------------------------- */
+        /* STOCK WITHDRAWAL & REPLENISHMENT MODAL               */
+        /* ---------------------------------------------------- */
+        function openStockAdjustModal(id, actionType) {
+            const part = spareData.find(s => s.id === id);
+            if (!part) return;
+
+            document.getElementById('stockAdjustPartId').value = id;
+            document.getElementById('stockAdjustActionType').value = actionType;
+            document.getElementById('stockAdjustQtyInput').value = 1;
+            document.getElementById('stockAdjustReason').value = '';
+
+            const isAdd = actionType === 'add';
+            document.getElementById('stockModalTitle').innerText = isAdd ? `Add / Replenish Stocks` : `Withdraw Stocks`;
+            document.getElementById('stockModalSubtitle').innerText = `${part.name} (${part.code}) - Current: ${part.quantity} units`;
+            document.getElementById('stockActionLabel').innerText = isAdd ? 'Add' : 'Withdraw';
+            
+            const submitBtn = document.getElementById('stockSubmitBtn');
+            if (submitBtn) {
+                submitBtn.innerText = isAdd ? 'Add Stock' : 'Withdraw Stock';
+                submitBtn.className = isAdd ? 'btn-ui btn-primary' : 'btn-ui btn-danger';
+            }
+
+            document.getElementById('stockAdjustModal').style.display = 'flex';
+        }
+
+        function closeStockAdjustModal() {
+            document.getElementById('stockAdjustModal').style.display = 'none';
+        }
+
+        function handleStockAdjustSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('stockAdjustPartId').value;
+            const actionType = document.getElementById('stockAdjustActionType').value;
+            const qtyChange = parseInt(document.getElementById('stockAdjustQtyInput').value, 10) || 0;
+            const reason = document.getElementById('stockAdjustReason').value.trim();
+
+            const part = spareData.find(s => s.id === id);
+            if (!part) return;
+
+            let currentQty = Number(part.quantity || 0);
+            if (actionType === 'withdraw') {
+                if (qtyChange > currentQty) {
+                    alert(`Cannot withdraw ${qtyChange} units. Only ${currentQty} units currently in stock.`);
+                    return;
+                }
+                part.quantity = currentQty - qtyChange;
+                showToast(`Withdrew ${qtyChange} units of ${part.code}${reason ? ' (' + reason + ')' : ''}`);
+            } else {
+                part.quantity = currentQty + qtyChange;
+                showToast(`Added ${qtyChange} units of ${part.code}${reason ? ' (' + reason + ')' : ''}`);
+            }
+
+            saveSpareData();
+            closeStockAdjustModal();
+            renderSparePartsTable();
+        }
+
+        function exportSpareCSV() {
+            let csv = '"Name","Product Code","Handler Type","Stock Quantity"\n';
+            spareData.forEach(p => {
+                csv += `"${(p.name || '').replace(/"/g, '""')}","${(p.code || '').replace(/"/g, '""')}","${(p.handler || '').replace(/"/g, '""')}","${p.quantity || 0}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'spare_parts_inventory_export.csv');
+            a.click();
+        }
+
+        // Initialize UI
         checkAuthUI();
+        updateSpareCounts();
         loadTableData();
     </script>
 </body>
