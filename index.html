@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -136,7 +136,7 @@
         }
 
         /* ---------------------------------------------------- */
-        /* LEFT SIDEBAR (Borderless & Seamless Merge with Header)*/
+        /* LEFT SIDEBAR                                         */
         /* ---------------------------------------------------- */
         .app-sidebar {
             width: 260px;
@@ -159,7 +159,6 @@
             position: relative;
         }
 
-        /* Collapsed Sidebar State */
         .app-sidebar.collapsed {
             width: 72px;
             min-width: 72px;
@@ -211,7 +210,6 @@
             width: 100%;
         }
 
-        /* Brand Row with Collapse Toggle */
         .sidebar-brand-row {
             display: flex;
             align-items: center;
@@ -256,7 +254,6 @@
             font-weight: 600;
         }
 
-        /* Inline Theme Switcher in User Card */
         .sidebar-theme-toggle {
             display: flex;
             align-items: center;
@@ -282,16 +279,12 @@
             color: var(--text-muted);
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .theme-toggle-dot svg {
-            display: block;
-        }
-        /* Light mode active dot */
+        .theme-toggle-dot svg { display: block; }
         body.theme-light .theme-toggle-dot#dotLight.active {
             background: #ffffff;
             color: #f59e0b;
             box-shadow: 0 2px 6px rgba(0,0,0,0.12);
         }
-        /* Dark mode active dot */
         body.theme-dark .theme-toggle-dot#dotDark.active {
             background: #ffffff;
             color: #1e293b;
@@ -310,11 +303,7 @@
             display: none !important;
         }
 
-        /* Sidebar Search */
-        .sidebar-search {
-            position: relative;
-            width: 100%;
-        }
+        .sidebar-search { position: relative; width: 100%; }
         .sidebar-search input {
             width: 100%;
             padding: 9px 12px 9px 36px;
@@ -339,7 +328,6 @@
             pointer-events: none;
         }
 
-        /* Sidebar Navigation Category Tabs (Handler Repair vs Spare Parts) */
         .sidebar-tabs-row {
             display: flex;
             align-items: center;
@@ -363,9 +351,7 @@
             white-space: nowrap;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .sidebar-tab-btn:hover {
-            color: var(--text-main);
-        }
+        .sidebar-tab-btn:hover { color: var(--text-main); }
         .sidebar-tab-btn.active {
             background: var(--control-active);
             color: var(--text-main);
@@ -380,44 +366,8 @@
             background: rgba(255, 255, 255, 0.16);
             color: #ffffff;
         }
-        .app-sidebar.collapsed .sidebar-tabs-row {
-            display: none !important;
-        }
+        .app-sidebar.collapsed .sidebar-tabs-row { display: none !important; }
 
-        /* Blank State for Spare Parts Tab */
-        .blank-tab-view {
-            display: none;
-            flex: 1;
-            margin: 16px 26px 14px 26px;
-            border-radius: 18px;
-            background: var(--glass-card);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            box-shadow: var(--glass-shadow);
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 14px;
-            color: var(--text-muted);
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .blank-tab-view svg {
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-        .blank-tab-view h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-        .blank-tab-view p {
-            font-size: 13px;
-            color: var(--text-muted);
-            max-width: 320px;
-        }
-
-        /* Navigation List */
         .sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -505,26 +455,19 @@
             align-items: center;
             justify-content: center;
         }
-        /* Dark Theme Badges */
         body.theme-dark .nav-badge-pill { background: rgba(236, 72, 153, 0.22); color: #f472b6; }
         body.theme-dark .nav-badge-num { background: var(--control-bg); color: #cbd5e1; }
         body.theme-dark .nav-badge-active { background: rgba(239, 68, 68, 0.22); color: #fca5a5; }
         body.theme-dark .nav-badge-pending { background: rgba(245, 158, 11, 0.22); color: #fde047; }
         body.theme-dark .nav-badge-resolved { background: rgba(16, 185, 129, 0.22); color: #6ee7b7; }
 
-        /* Light Theme Badges (High Contrast & Crisp Readability) */
         body.theme-light .nav-badge-pill { background: #fce7f3; color: #db2777; font-weight: 800; }
         body.theme-light .nav-badge-num { background: rgba(15, 23, 42, 0.08); color: #334155; font-weight: 800; }
         body.theme-light .nav-badge-active { background: #fee2e2; color: #dc2626; font-weight: 800; }
         body.theme-light .nav-badge-pending { background: #fef3c7; color: #d97706; font-weight: 800; }
         body.theme-light .nav-badge-resolved { background: #d1fae5; color: #059669; font-weight: 800; }
 
-        /* ---------------------------------------------------- */
-        /* SIDEBAR BOTTOM USER / AUTH CARD (Matching Mockup)    */
-        /* ---------------------------------------------------- */
-        .sidebar-bottom {
-            padding-top: 10px;
-        }
+        .sidebar-bottom { padding-top: 10px; }
         .user-profile-card {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
@@ -538,73 +481,10 @@
             border: none;
             transition: all 0.2s ease;
         }
-        body.theme-light .user-profile-card {
-            background: rgba(15, 23, 42, 0.04);
-        }
-        .user-profile-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-        body.theme-light .user-profile-card:hover {
-            background: rgba(15, 23, 42, 0.07);
-        }
-        .user-avatar-wrap {
-            position: relative;
-            flex-shrink: 0;
-        }
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #475569;
-            color: #fff;
-            font-weight: 700;
-            font-size: 13.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .avatar-guest {
-            background: #64748b;
-        }
-        .user-status-dot {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            border: 2px solid var(--bg-canvas);
-        }
-        .user-status-dot.offline {
-            background: #94a3b8;
-        }
+        body.theme-light .user-profile-card { background: rgba(15, 23, 42, 0.04); }
+        .user-profile-card:hover { background: rgba(255, 255, 255, 0.07); }
+        body.theme-light .user-profile-card:hover { background: rgba(15, 23, 42, 0.07); }
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            flex: 1;
-        }
-        .user-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.25;
-        }
-        .user-role {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.25;
-        }
-
-        /* Sidebar Auth Button */
         .sidebar-auth-action {
             width: 34px;
             height: 34px;
@@ -619,27 +499,15 @@
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             flex-shrink: 0;
         }
-        body.theme-light .sidebar-auth-action {
-            background: rgba(15, 23, 42, 0.06);
-        }
+        body.theme-light .sidebar-auth-action { background: rgba(15, 23, 42, 0.06); }
         .sidebar-auth-action:hover {
             background: rgba(255, 255, 255, 0.15);
             transform: scale(1.04);
         }
-        body.theme-light .sidebar-auth-action:hover {
-            background: rgba(15, 23, 42, 0.12);
-        }
-        .btn-logout {
-            color: #f87171;
-            background: rgba(239, 68, 68, 0.15);
-        }
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.3);
-            color: #fff;
-        }
-        .btn-login {
-            color: var(--text-main);
-        }
+        body.theme-light .sidebar-auth-action:hover { background: rgba(15, 23, 42, 0.12); }
+        .btn-logout { color: #f87171; background: rgba(239, 68, 68, 0.15); }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.3); color: #fff; }
+        .btn-login { color: var(--text-main); }
 
         /* ---------------------------------------------------- */
         /* MAIN CONTENT AREA                                    */
@@ -654,7 +522,6 @@
             min-width: 0;
         }
 
-        /* Header - BORDERLESS (Seamless merge) */
         .app-header {
             position: relative;
             z-index: 20;
@@ -667,7 +534,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            box-shadow: none; /* Merged seamlessly without borders or separation shadows */
+            box-shadow: none;
         }
 
         .header-left {
@@ -775,7 +642,6 @@
             color: #ffffff;
         }
 
-        /* Density Pill Group */
         .dock-pill-group {
             display: flex;
             align-items: center;
@@ -801,9 +667,7 @@
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .dock-btn:hover {
-            color: var(--text-main);
-        }
+        .dock-btn:hover { color: var(--text-main); }
         .dock-btn.active {
             background: var(--control-active);
             color: var(--text-main);
@@ -819,13 +683,12 @@
             color: #ffffff;
         }
 
-        /* Table Canvas - BORDERLESS */
         .table-wrap {
             position: relative;
             z-index: 5;
-            flex: 1;
-            margin: 16px 26px 14px 26px;
-            border-radius: 18px;
+            flex: 1;  
+            margin: 15px 0 0 15px;
+            border-radius:15px;
             background: var(--glass-card);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
@@ -839,11 +702,7 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        .table-wrap::-webkit-scrollbar {
-            display: none;
-            width: 0;
-            height: 0;
-        }
+        .table-wrap::-webkit-scrollbar { display: none; width: 0; height: 0; }
         .table-wrap.is-dragging { cursor: grabbing !important; }
 
         table.sheet-table {
@@ -864,18 +723,10 @@
             height: var(--row-height);
         }
 
-        tbody tr {
-            transition: background-color 0.15s ease;
-        }
-        tbody tr:nth-child(even) {
-            background-color: var(--row-stripe-bg);
-        }
-        tbody tr:hover td { 
-            background-color: var(--row-hover-bg); 
-        }
-        tbody tr.selected td { 
-            background-color: rgba(249, 115, 22, 0.16) !important; 
-        }
+        tbody tr { transition: background-color 0.15s ease; }
+        tbody tr:nth-child(even) { background-color: var(--row-stripe-bg); }
+        tbody tr:hover td { background-color: var(--row-hover-bg); }
+        tbody tr.selected td { background-color: rgba(249, 115, 22, 0.16) !important; }
 
         th {
             background: var(--glass-th);
@@ -910,7 +761,6 @@
         .col-num { width: 50px; text-align: center; color: var(--text-muted); font-size: 11.5px; font-weight: 600; }
         .col-actions { width: 150px; text-align: center; }
 
-        /* Modern Custom Checkbox Styling */
         input[type="checkbox"] {
             -webkit-appearance: none;
             appearance: none;
@@ -975,45 +825,18 @@
             height: 6px;
             border-radius: 50%;
         }
-        /* Dark Theme Status Badges */
-        body.theme-dark .status-Active { 
-            background: rgba(239, 68, 68, 0.2); 
-            color: #fca5a5; 
-        }
+        body.theme-dark .status-Active { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
         body.theme-dark .status-Active::before { background: #ef4444; }
-
-        body.theme-dark .status-Pending { 
-            background: rgba(245, 158, 11, 0.2); 
-            color: #fde047; 
-        }
+        body.theme-dark .status-Pending { background: rgba(245, 158, 11, 0.2); color: #fde047; }
         body.theme-dark .status-Pending::before { background: #f59e0b; }
-
-        body.theme-dark .status-Resolved { 
-            background: rgba(16, 185, 129, 0.2); 
-            color: #6ee7b7; 
-        }
+        body.theme-dark .status-Resolved { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
         body.theme-dark .status-Resolved::before { background: #10b981; }
 
-        /* Light Theme Status Badges (High Contrast, Crisp & Bold) */
-        body.theme-light .status-Active { 
-            background: #fee2e2; 
-            color: #b91c1c; 
-            font-weight: 700;
-        }
+        body.theme-light .status-Active { background: #fee2e2; color: #b91c1c; font-weight: 700; }
         body.theme-light .status-Active::before { background: #dc2626; }
-
-        body.theme-light .status-Pending { 
-            background: #fef3c7; 
-            color: #b45309; 
-            font-weight: 700;
-        }
+        body.theme-light .status-Pending { background: #fef3c7; color: #b45309; font-weight: 700; }
         body.theme-light .status-Pending::before { background: #d97706; }
-
-        body.theme-light .status-Resolved { 
-            background: #d1fae5; 
-            color: #047857; 
-            font-weight: 700;
-        }
+        body.theme-light .status-Resolved { background: #d1fae5; color: #047857; font-weight: 700; }
         body.theme-light .status-Resolved::before { background: #059669; }
 
         .cell-img-thumb {
@@ -1051,7 +874,6 @@
         .row-btn-delete { color: #f87171; }
         .row-btn-delete:hover { background: rgba(248, 113, 113, 0.22); }
 
-        /* Footer & Bottom Dock - BORDERLESS */
         .app-footer {
             position: relative;
             z-index: 10;
@@ -1068,44 +890,6 @@
             box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
         }
 
-        .footer-controls-dock {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dock-pill-group {
-            display: flex;
-            background: var(--control-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: none;
-            border-radius: 9px;
-            overflow: hidden;
-            padding: 3px;
-        }
-
-        .dock-btn {
-            border: none;
-            background: none;
-            padding: 5px 11px;
-            font-size: 11.5px;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-weight: 700;
-            border-radius: 7px;
-            transition: all 0.18s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .dock-btn.active {
-            background: var(--control-active);
-            color: var(--text-main);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-        }
-
-        /* Modal Overlay - BORDERLESS */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -1144,7 +928,6 @@
             box-shadow: 0 0 0 2px var(--accent-pink); 
         }
 
-        /* Slide-over Drawer - BORDERLESS */
         .drawer-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -1228,11 +1011,7 @@
             box-shadow: 0 0 0 2px var(--accent-pink);
         }
 
-        /* Custom Select Component */
-        .custom-select-wrap {
-            position: relative;
-            width: 100%;
-        }
+        .custom-select-wrap { position: relative; width: 100%; }
         .custom-select-trigger {
             width: 100%;
             padding: 10px 14px;
@@ -1251,9 +1030,7 @@
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             user-select: none;
         }
-        .custom-select-trigger:hover {
-            background: var(--control-active);
-        }
+        .custom-select-trigger:hover { background: var(--control-active); }
         .custom-select-wrap.is-open .custom-select-trigger {
             background: var(--control-active);
             box-shadow: 0 0 0 2px var(--accent-pink);
@@ -1312,9 +1089,7 @@
             transition: all 0.15s ease;
             user-select: none;
         }
-        .custom-select-option:hover {
-            background: var(--control-active);
-        }
+        .custom-select-option:hover { background: var(--control-active); }
         .custom-select-option.is-selected {
             background: rgba(236, 72, 153, 0.15);
             color: #fff;
@@ -1326,9 +1101,8 @@
             transition: opacity 0.15s;
             flex-shrink: 0;
         }
-        .custom-select-option.is-selected .option-check {
-            opacity: 1;
-        }
+        .custom-select-option.is-selected .option-check { opacity: 1; }
+
         .custom-status-badge {
             display: inline-flex;
             align-items: center;
@@ -1410,17 +1184,10 @@
             box-shadow: 0 16px 36px rgba(0,0,0,0.25);
             border: none;
         }
-        body.theme-dark #toast {
-            color: #ffffff;
-            box-shadow: 0 16px 36px rgba(0,0,0,0.6);
-        }
-        body.theme-light #toast {
-            background: #ffffff;
-            color: #0f172a;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
-        }
+        body.theme-dark #toast { color: #ffffff; box-shadow: 0 16px 36px rgba(0,0,0,0.6); }
+        body.theme-light #toast { background: #ffffff; color: #0f172a; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15); }
 
-        /* Spare Parts Inventory & Stock Management Styles */
+        /* Spare Parts Styles */
         .stock-qty-badge {
             display: inline-flex;
             align-items: center;
@@ -1472,18 +1239,9 @@
             cursor: pointer;
             transition: all 0.15s;
         }
-        .btn-stock-adj:hover {
-            background: var(--control-active);
-            transform: scale(1.1);
-        }
-        .btn-stock-adj.btn-plus:hover {
-            background: #10b981;
-            color: #fff;
-        }
-        .btn-stock-adj.btn-minus:hover {
-            background: #ef4444;
-            color: #fff;
-        }
+        .btn-stock-adj:hover { background: var(--control-active); transform: scale(1.1); }
+        .btn-stock-adj.btn-plus:hover { background: #10b981; color: #fff; }
+        .btn-stock-adj.btn-minus:hover { background: #ef4444; color: #fff; }
     </style>
 </head>
 <body class="density-normal is-readonly theme-dark">
@@ -1655,7 +1413,6 @@
         <!-- Sidebar Bottom: Theme Toggle & Login/Logout Action -->
         <div class="sidebar-bottom">
             <div class="user-profile-card">
-                <!-- Direct Theme Switcher Pill (Light & Dark Icons) -->
                 <div class="sidebar-theme-toggle" onclick="toggleThemeMini()" title="Switch Light / Dark theme">
                     <div class="theme-toggle-dot" id="dotLight" title="Light Mode">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -1665,10 +1422,8 @@
                     </div>
                 </div>
 
-                <!-- Live Dynamic Theme Mode Text -->
                 <span class="sidebar-theme-text" id="themeModeText">Dark Mode</span>
 
-                <!-- Login / Logout Action Button -->
                 <button type="button" id="authBtn" class="sidebar-auth-action btn-login" onclick="toggleAuthModal()" title="Login to Edit">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -1703,10 +1458,8 @@
             </div>
 
             <div class="header-actions">
-                <!-- Density Toggle Pill Group -->
                 <div class="dock-pill-group">
                     <button class="dock-btn" id="btnDensityCompact" onclick="setDensity('compact')">
-                        <!-- Compact Density: Inward collapse arrows / compressed grid -->
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 14h6v6"></path>
                             <path d="M20 10h-6V4"></path>
@@ -1716,7 +1469,6 @@
                         <span>Compact</span>
                     </button>
                     <button class="dock-btn active" id="btnDensityNormal" onclick="setDensity('normal')">
-                        <!-- Normal Density: Clean table layout / rows -->
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                             <path d="M3 9h18"></path>
@@ -1733,6 +1485,23 @@
                     </svg>
                     <span>Delete Selected</span>
                 </button>
+<!-- Open Excel File Button -->
+<a href="https://analog-my.sharepoint.com/:x:/r/personal/ariel_mentawan_analog_com/_layouts/15/Doc.aspx?sourcedoc=%7B3febd084-a91a-4d93-814e-e86736350784%7D&action=edit" 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   class="btn-ui" 
+   title="Open Original Excel Sheet in SharePoint"
+   style="text-decoration: none; color: var(--text-main);">
+    <!-- Microsoft Excel Spreadsheet Icon -->
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="8" y1="13" x2="16" y2="13"/>
+        <line x1="8" y1="17" x2="16" y2="17"/>
+        <line x1="10" y1="9" x2="8" y2="9"/>
+    </svg>
+    <span>Open Excel</span>
+</a>
                 <button class="btn-ui btn-primary auth-only" id="addRowBtn" onclick="openAddRowDrawer()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1761,12 +1530,15 @@
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> DATE</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span> TESTER ID</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg></span> HANDLER ID</div></th>
+                        
+                        <!-- DETAILS (IMAGE AS EVIDENCE) - POSITIONED DIRECTLY AFTER HANDLER ID -->
+                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> DETAILS (Image as Evidence)</div></th>
+
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span> DEVICE</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span> PACKAGE</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> Handler Major Part</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> PROBLEM</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><circle cx="11" cy="11" r="3"/></svg></span> ROOT CAUSE</div></th>
-                        <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> DETAILS</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> MATERIAL CODE</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span> Stock Items</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg></span> PENDING ACTION</div></th>
@@ -1792,7 +1564,7 @@
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span> STOCKS QUANTITY</div></th>
                         <th><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> IMAGE</div></th>
                         <th class="col-actions"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg></span> STOCK ADJUST</div></th>
-                        <th class="col-actions auth-only"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> ACTIONS</div></th>
+                        <th class="col-actions auth-only"><div class="th-content"><span class="type-icon-svg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> ACTIONS</div></th>
                     </tr>
                 </thead>
                 <tbody id="sparePartsTableBody">
@@ -1800,6 +1572,10 @@
                 </tbody>
             </table>
         </div>
+
+        <footer class="app-footer">
+            <span id="footerCount">Showing 0 of 0 items</span>
+        </footer>
     </main>
 
     <!-- Spare Part Add / Edit Drawer -->
@@ -1905,7 +1681,7 @@
         </div>
     </div>
 
-    <!-- Slide-over Drawer (Single Evidence Photo Picker) -->
+    <!-- Slide-over Drawer (Record Add / Edit) -->
     <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
     <div class="drawer-panel" id="drawerPanel">
         <div class="drawer-header">
@@ -1939,18 +1715,9 @@
                         <input type="text" id="form-handler" class="form-control" placeholder="Enter handler id" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>Device</label>
-                        <input type="text" id="form-device" class="form-control" placeholder="Enter device">
-                    </div>
-                    <div class="form-group">
-                        <label>Package</label>
-                        <input type="text" id="form-package" class="form-control" placeholder="Enter package">
-                    </div>
-
-                    <!-- Single Image Evidence Picker -->
+                    <!-- Single Image Evidence Picker (Placed After Handler ID) -->
                     <div class="form-group col-span-2">
-                        <label>Details (Image as Evidence)</label>
+                        <label>DETAILS (Image as Evidence)</label>
                         <div class="photo-picker-wrap">
                             <div class="photo-thumb-box" id="detailsThumb">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -1962,6 +1729,15 @@
                             </button>
                             <span id="detailsFileName" style="font-size:12px; color:var(--text-muted);">No photo chosen</span>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Device</label>
+                        <input type="text" id="form-device" class="form-control" placeholder="Enter device">
+                    </div>
+                    <div class="form-group">
+                        <label>Package</label>
+                        <input type="text" id="form-package" class="form-control" placeholder="Enter package">
                     </div>
 
                     <div class="form-group col-span-2">
@@ -2065,17 +1841,18 @@
         let uploadedPhotoBase64 = "";
         let currentStatusFilter = "";
 
+        // COLUMNS: "DETAILS" is placed right after "HANDLER ID"
         const columns = [
             { key: 'WW', label: 'WW', type: 'text' },
             { key: 'DATE', label: 'DATE', type: 'text' },
             { key: 'TESTER ID', label: 'TESTER ID', type: 'text' },
             { key: 'HANDLER ID', label: 'HANDLER ID', type: 'text' },
+            { key: 'DETAILS', label: 'DETAILS (Image as Evidence)', type: 'image' },
             { key: 'DEVICE', label: 'DEVICE', type: 'text' },
             { key: 'PACKAGE', label: 'PACKAGE', type: 'text' },
             { key: 'Handler Major Part', label: 'Handler Major Part', type: 'text' },
             { key: 'PROBLEM', label: 'PROBLEM', type: 'text' },
             { key: 'ROOT CAUSE', label: 'ROOT CAUSE', type: 'text' },
-            { key: 'DETAILS', label: 'DETAILS', type: 'image' },
             { key: 'MATERIAL CODE', label: 'MATERIAL CODE', type: 'text' },
             { key: 'STOCK ITEMS', label: 'Stock Items', type: 'text' },
             { key: 'PENDING ACTION', label: 'PENDING ACTION', type: 'text' },
@@ -2084,9 +1861,6 @@
 
         let currentActiveCategoryTab = 'repair';
 
-        /* ---------------------------------------------------- */
-        /* CATEGORY TABS (HANDLER REPAIR vs SPARE PARTS)        */
-        /* ---------------------------------------------------- */
         function switchCategoryTab(tab) {
             currentActiveCategoryTab = tab;
             const btnRepair = document.getElementById('tabBtnRepair');
@@ -2128,9 +1902,6 @@
             }
         }
 
-        /* ---------------------------------------------------- */
-        /* SIDEBAR COLLAPSE / EXPAND TOGGLE                     */
-        /* ---------------------------------------------------- */
         function toggleSidebarCollapse() {
             const sidebar = document.querySelector('.app-sidebar');
             if (sidebar) {
@@ -2139,20 +1910,15 @@
             }
         }
 
-        // Restore sidebar state
         if (localStorage.getItem('sidebar_collapsed_pref') === 'true') {
             const sidebar = document.querySelector('.app-sidebar');
             if (sidebar) sidebar.classList.add('collapsed');
         }
+
         function setTheme(theme) {
             document.body.classList.remove('theme-dark', 'theme-light');
             document.body.classList.add(`theme-${theme}`);
             localStorage.setItem('user_theme_pref', theme);
-
-            const btnDark = document.getElementById('btnThemeDark');
-            const btnLight = document.getElementById('btnThemeLight');
-            if (btnDark) btnDark.classList.toggle('active', theme === 'dark');
-            if (btnLight) btnLight.classList.toggle('active', theme === 'light');
 
             const dotDark = document.getElementById('dotDark');
             const dotLight = document.getElementById('dotLight');
@@ -2186,9 +1952,6 @@
         setTheme(savedTheme);
         setDensity(savedDensity);
 
-        /* ---------------------------------------------------- */
-        /* SIDEBAR STATUS FILTER                                */
-        /* ---------------------------------------------------- */
         function setFilterStatus(status) {
             currentStatusFilter = status;
 
@@ -2213,9 +1976,7 @@
             }
         }
 
-        /* ---------------------------------------------------- */
-        /* PAN-TO-SCROLL (DRAG TO SCROLL RIGHT / LEFT)          */
-        /* ---------------------------------------------------- */
+        // Pan to scroll
         const slider = document.getElementById('tableWrap');
         let isDown = false;
         let startX = 0;
@@ -2258,22 +2019,10 @@
 
         function checkAuthUI() {
             const authBtn = document.getElementById('authBtn');
-            const avatar = document.getElementById('sidebarUserAvatar');
-            const nameEl = document.getElementById('sidebarUserName');
-            const roleEl = document.getElementById('sidebarUserRole');
-            const dotEl = document.getElementById('sidebarStatusDot');
 
             if (isLoggedIn) {
                 document.body.classList.remove('is-readonly');
                 document.body.classList.add('is-admin');
-                if (avatar) {
-                    avatar.innerText = "AD";
-                    avatar.classList.remove('avatar-guest');
-                }
-                if (nameEl) nameEl.innerText = "Admin User";
-                if (roleEl) roleEl.innerText = "Administrator";
-                if (dotEl) dotEl.classList.remove('offline');
-
                 if (authBtn) {
                     authBtn.className = "sidebar-auth-action btn-logout";
                     authBtn.title = "Logout";
@@ -2288,14 +2037,6 @@
             } else {
                 document.body.classList.remove('is-admin');
                 document.body.classList.add('is-readonly');
-                if (avatar) {
-                    avatar.innerText = "G";
-                    avatar.classList.add('avatar-guest');
-                }
-                if (nameEl) nameEl.innerText = "Guest Viewer";
-                if (roleEl) roleEl.innerText = "View Only";
-                if (dotEl) dotEl.classList.add('offline');
-
                 if (authBtn) {
                     authBtn.className = "sidebar-auth-action btn-login";
                     authBtn.title = "Login to Edit";
@@ -2406,21 +2147,43 @@
             return '';
         }
 
+        // Sanitizes Excel errors like #BLOCKED!, #VALUE!, #REF! so they never show in UI
+        function sanitizeValue(v) {
+            if (v === undefined || v === null) return '';
+            const str = String(v).trim();
+            if (str.toUpperCase().includes('#BLOCKED') || 
+                str.startsWith('#REF!') || 
+                str.startsWith('#VALUE!') || 
+                str.startsWith('#N/A') || 
+                str.startsWith('#NAME?')) {
+                return '';
+            }
+            return str;
+        }
+
         function getVal(row, key) {
             if (!row) return '';
-            if (row[key] !== undefined && row[key] !== null) return String(row[key]).trim();
+            if (row[key] !== undefined && row[key] !== null) {
+                return sanitizeValue(row[key]);
+            }
 
             const aliases = {
                 'WW': ['WW', 'ww'],
                 'DATE': ['DATE', 'Date'],
                 'TESTER ID': ['TESTER ID', 'TESTER_ID', 'TESTER_x0020_ID', 'Tester ID'],
                 'HANDLER ID': ['HANDLER ID', 'HANDLER_ID', 'HANDLER_x0020_ID', 'Handler ID', 'EventName'],
+                'DETAILS': [
+                    'DETAILS (Image as Evidence)', 
+                    'DETAILS\n(Image as Evidence)', 
+                    'Details (Image as Evidence)',
+                    'DETAILS', 
+                    'Details'
+                ],
                 'DEVICE': ['DEVICE', 'Device', 'device'],
                 'PACKAGE': ['PACKAGE', 'Package', 'package'],
                 'Handler Major Part': ['Handler Major Part', 'HANDLER MAJOR PART', 'Handler_x0020_Major_x0020_Part', 'MajorPart'],
                 'PROBLEM': ['PROBLEM', 'Problem', 'problem'],
                 'ROOT CAUSE': ['ROOT CAUSE', 'ROOT CASUE', 'ROOT_x0020_CAUSE', 'Root Cause'],
-                'DETAILS': ['DETAILS\n(Image as Evidence)', 'DETAILS (Image as Evidence)', 'DETAILS', 'Details'],
                 'MATERIAL CODE': ['MATERIAL CODE', 'Material Code', 'MATERIAL_CODE'],
                 'STOCK ITEMS': ['Stock Items\nNon Stock Items', 'Stock Items / Non Stock Items', 'Stock Items', 'StockItems'],
                 'PENDING ACTION': ['PENDING ACTION', 'Pending Action', 'PENDING_ACTION'],
@@ -2429,8 +2192,9 @@
 
             const checks = aliases[key] || [key];
             for (const k of checks) {
-                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
-                    return String(row[k]).trim();
+                if (row[k] !== undefined && row[k] !== null) {
+                    const v = sanitizeValue(row[k]);
+                    if (v !== '') return v;
                 }
             }
 
@@ -2438,7 +2202,7 @@
             for (const actualKey of Object.keys(row)) {
                 const cleanActual = actualKey.toLowerCase().replace(/_x[0-9a-f]{4}_/gi, '').replace(/[^a-z0-9]/g, '');
                 if (cleanActual === cleanTarget && row[actualKey] !== undefined && row[actualKey] !== null) {
-                    return String(row[actualKey]).trim();
+                    return sanitizeValue(row[actualKey]);
                 }
             }
             return '';
@@ -2447,6 +2211,7 @@
         function isImageSource(str) {
             if (!str || typeof str !== 'string') return false;
             const trimmed = str.trim();
+            if (trimmed.toUpperCase().includes('#BLOCKED')) return false;
             return trimmed.startsWith('data:image') ||
                    trimmed.startsWith('blob:') ||
                    /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i.test(trimmed);
@@ -2482,7 +2247,7 @@
                     const val = getVal(row, col.key);
                     const isImg = isImageSource(val) || (col.type === 'image' && val.startsWith('http'));
 
-                    if (isImg || col.type === 'image') {
+                    if (col.type === 'image') {
                         html += `<td>${isImg ? `<img src="${val}" class="cell-img-thumb" onclick="previewImage('${val}')" alt="${col.label}">` : `<span style="color:var(--text-muted)">-</span>`}</td>`;
                     } else if (col.type === 'badge') {
                         const st = val || 'Active';
@@ -2537,9 +2302,6 @@
             });
         }
 
-        /* ---------------------------------------------------- */
-        /* CUSTOM DROPDOWN HELPERS                              */
-        /* ---------------------------------------------------- */
         function toggleCustomDropdown(wrapId) {
             const wrap = document.getElementById(wrapId);
             if (!wrap) return;
@@ -2705,12 +2467,12 @@
                 "DATE": document.getElementById('form-date').value,
                 "TESTER_ID": document.getElementById('form-tester').value.trim(),
                 "HANDLER_ID": document.getElementById('form-handler').value.trim(),
+                "DETAILS": uploadedPhotoBase64,
                 "DEVICE": document.getElementById('form-device').value.trim(),
                 "PACKAGE": document.getElementById('form-package').value.trim(),
                 "MajorPart": document.getElementById('form-majorpart').value.trim(),
                 "PROBLEM": document.getElementById('form-problem').value.trim(),
                 "ROOT_CAUSE": document.getElementById('form-cause').value.trim(),
-                "DETAILS": uploadedPhotoBase64,
                 "MATERIAL_CODE": document.getElementById('form-material').value.trim(),
                 "StockItems": document.getElementById('form-stock').value,
                 "PENDING_ACTION": document.getElementById('form-pending').value.trim(),
@@ -3082,9 +2844,6 @@
             if (fc) fc.innerText = `Showing ${filtered.length} of ${spareData.length} spare parts`;
         }
 
-        /* ---------------------------------------------------- */
-        /* SPARE PARTS DRAWER & STOCK ACTIONS                   */
-        /* ---------------------------------------------------- */
         function openAddSpareDrawer() {
             if (!isLoggedIn) {
                 toggleAuthModal();
@@ -3197,9 +2956,6 @@
             showToast("Spare part deleted");
         }
 
-        /* ---------------------------------------------------- */
-        /* STOCK WITHDRAWAL & REPLENISHMENT MODAL               */
-        /* ---------------------------------------------------- */
         function openStockAdjustModal(id, actionType) {
             const part = spareData.find(s => s.id === id);
             if (!part) return;
